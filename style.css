@@ -182,11 +182,11 @@ ul {
 
 .btn-outline-dark {
     background: transparent;
-    color: #fff;
+    color: var(--text-dark);
     padding: 13px 28px;
     border-radius: 30px;
     font-weight: 700;
-    border: 2px solid rgba(255, 255, 255, 0.45);
+    border: 2px solid var(--text-dark);
     transition: 0.3s;
     letter-spacing: 0.5px;
     display: inline-flex;
@@ -194,8 +194,8 @@ ul {
 }
 
 .btn-outline-dark:hover {
-    background: #fff;
-    color: #111;
+    background: var(--text-dark);
+    color: #fff;
 }
 
 /* Typography */
@@ -823,6 +823,12 @@ ul {
     overflow: hidden;
 }
 
+.product-info-box {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
 .product-card-exact::before {
     content: '';
     position: absolute;
@@ -1381,6 +1387,11 @@ ul {
         overflow-x: auto;
         padding: 0 10px;
         justify-content: flex-start;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+    .nav-inner-wrapper::-webkit-scrollbar {
+        display: none;
     }
 
     .nav-menu {
@@ -1565,3 +1576,31 @@ ul {
 .modal-overlay.active .modal-box { transform: translateY(0); }
 .close-modal-btn { position: absolute; top: 15px; right: 15px; background: #f0f0f0; border: none; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; color: #555; }
 .close-modal-btn:hover { background: var(--red); color: #fff; }
+
+/* Smooth Scroll & Offset for sticky header */
+html {
+    scroll-behavior: smooth;
+}
+section, [id], .inv-anchor {
+    scroll-margin-top: 80px;
+}
+
+/* Mobile Header Crowding Fix */
+@media (max-width: 768px) {
+    .ts-inner {
+        gap: 10px;
+    }
+    .ts-logo img {
+        height: 55px;
+        margin-right: 5px;
+    }
+    .ts-action-item {
+        padding: 8px 12px;
+    }
+    .ts-action-item span {
+        display: none !important;
+    }
+    #userNameLabel {
+        display: none !important;
+    }
+}
