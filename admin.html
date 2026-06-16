@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Peekey Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#080b12;--card:#111622;--card2:#181f2e;--red:#c0392b;--border:#1e2738;--text:#e8eaf0;--muted:#6b7494;--green:#10b981;--orange:#f59e0b}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* ── LOGIN ── */
+#loginPage{min-height:100vh;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 60% 40%,#1a0a10 0%,var(--bg) 70%)}
+.login-wrap{width:100%;max-width:420px;padding:20px}
+.login-logo{text-align:center;margin-bottom:32px}
+.login-logo h1{font-size:2.6rem;font-weight:800;color:var(--red);letter-spacing:-1px}
+.login-logo p{color:var(--muted);font-size:.88rem;margin-top:4px}
+.login-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:36px}
+.login-card h2{font-size:1.2rem;font-weight:700;margin-bottom:4px}
+.login-card .sub{color:var(--muted);font-size:.83rem;margin-bottom:28px}
+.lfield{margin-bottom:16px}
+.lfield label{display:block;font-size:.75rem;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px}
+.lfield input{width:100%;padding:12px 16px;background:var(--card2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'Outfit',sans-serif;font-size:.95rem;outline:none;transition:.2s}
+.lfield input:focus{border-color:var(--red)}
+.lbtn{width:100%;padding:13px;background:var(--red);color:#fff;border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-weight:700;font-size:1rem;cursor:pointer;margin-top:8px;transition:.2s}
+.lbtn:hover{background:#a93226}
+.lerr{color:#ef4444;font-size:.82rem;margin-top:10px;text-align:center;display:none}
+
+/* ── DASHBOARD ── */
+#dashboard{display:none}
+.topbar{background:#0d1117;border-bottom:1px solid var(--border);padding:0 28px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.topbar-brand{font-size:1.2rem;font-weight:800;color:var(--red)}
+.topbar-brand span{color:var(--text);font-weight:400;font-size:.78rem;margin-left:8px}
+.topbar-actions{display:flex;gap:10px;align-items:center}
+.tbtn{padding:7px 16px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:.8rem;cursor:pointer;font-family:'Outfit',sans-serif;transition:.2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.tbtn:hover{border-color:var(--red);color:var(--red)}
+
+.main{max-width:1100px;margin:0 auto;padding:30px 24px}
+
+/* Stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:30px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px}
+.stat .n{font-size:2rem;font-weight:800;color:var(--red)}
+.stat .l{color:var(--muted);font-size:.78rem;margin-top:2px}
+
+/* Upload card */
+.ucard{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:26px;margin-bottom:24px}
+.ucard-title{font-size:1rem;font-weight:700;display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.ucard-title i{color:var(--red)}
+.ucard-sub{color:var(--muted);font-size:.82rem;margin-bottom:22px}
+.urow{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+.ufg label{display:block;font-size:.74rem;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px}
+.ufg input,.ufg select{width:100%;padding:11px 14px;background:var(--card2);border:1px solid var(--border);border-radius:9px;color:var(--text);font-family:'Outfit',sans-serif;font-size:.9rem;outline:none;transition:.2s}
+.ufg input:focus,.ufg select:focus{border-color:var(--red)}
+.ufg select option{background:var(--card2)}
+.auto-detect{font-size:.75rem;color:var(--orange);margin-top:5px;display:none}
+.dropzone{border:2px dashed var(--border);border-radius:14px;padding:38px;text-align:center;cursor:pointer;transition:.2s;background:var(--card2)}
+.dropzone:hover,.dropzone.over{border-color:var(--red);background:#1a0810}
+.dropzone i{font-size:2.4rem;color:var(--muted);display:block;margin-bottom:12px}
+.dropzone p{color:var(--muted);font-size:.88rem}
+.dropzone p span{color:var(--red);font-weight:600}
+#fInput{display:none}
+.previews{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.pitem{position:relative;width:88px;height:88px;border-radius:9px;overflow:hidden;border:2px solid var(--border)}
+.pitem img{width:100%;height:100%;object-fit:cover}
+.pitem .px{position:absolute;top:3px;right:3px;background:rgba(0,0,0,.75);border:none;color:#fff;border-radius:50%;width:20px;height:20px;font-size:.6rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.pbwrap{height:6px;background:var(--border);border-radius:3px;margin-top:14px;overflow:hidden;display:none}
+.pbfill{height:100%;background:var(--red);border-radius:3px;width:0;transition:width .3s}
+.uactions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.ubtn{padding:11px 24px;background:var(--red);color:#fff;border:none;border-radius:9px;font-family:'Outfit',sans-serif;font-weight:700;font-size:.9rem;cursor:pointer;display:flex;align-items:center;gap:8px;transition:.2s}
+.ubtn:hover{background:#a93226}
+.ubtn:disabled{opacity:.4;cursor:not-allowed}
+
+/* Config */
+.cfg-toggle{color:var(--muted);font-size:.8rem;cursor:pointer;display:flex;align-items:center;gap:6px;margin-bottom:16px;user-select:none}
+.cfg-toggle i{transition:.2s}
+.cfg-box{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:18px;display:none}
+.cfg-box.open{display:block}
+.cfg-row{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end}
+.cfg-status{font-size:.75rem;color:var(--green);margin-top:8px}
+
+/* Product grid */
+.cat-filter{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.cfbtn{padding:6px 16px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:.8rem;cursor:pointer;font-family:'Outfit',sans-serif;transition:.2s}
+.cfbtn.active,.cfbtn:hover{background:var(--red);border-color:var(--red);color:#fff}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+.pcard{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:.2s}
+.pcard:hover{border-color:var(--red);transform:translateY(-2px)}
+.pcard img{width:100%;height:110px;object-fit:cover}
+.pcard-body{padding:10px}
+.pcard-name{font-size:.8rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px}
+.pcard-cat{font-size:.65rem;color:var(--red);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.pdel{width:100%;padding:6px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);border-radius:6px;color:#ef4444;font-size:.72rem;cursor:pointer;font-family:'Outfit',sans-serif;transition:.2s}
+.pdel:hover{background:rgba(239,68,68,.25)}
+.empty{text-align:center;padding:60px;color:#2a3048;grid-column:1/-1}
+.empty i{font-size:2.5rem;display:block;margin-bottom:12px}
+
+/* Toast */
+#toast{position:fixed;bottom:24px;right:24px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 20px;font-size:.85rem;z-index:9999;display:flex;align-items:center;gap:10px;transform:translateY(60px);opacity:0;transition:.35s}
+#toast.show{transform:none;opacity:1}
+#toast.ok i{color:var(--green)}
+#toast.err i{color:#ef4444}
+
+@media(max-width:640px){.stats{grid-template-columns:repeat(2,1fr)}.urow{grid-template-columns:1fr}.cfg-row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginPage">
+  <div class="login-wrap">
+    <div class="login-logo">
+      <h1>PEEKEY</h1>
+      <p>Admin Image Manager — Restricted Access</p>
+    </div>
+    <div class="login-card">
+      <h2>Welcome Back 👋</h2>
+      <p class="sub">Sign in to manage product images</p>
+      <div class="lfield"><label>Username</label><input id="lUser" type="text" placeholder="admin"></div>
+      <div class="lfield"><label>Password</label><input id="lPass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <button class="lbtn" onclick="doLogin()"><i class="fas fa-sign-in-alt"></i> Login</button>
+      <p class="lerr" id="lerr">❌ Invalid credentials. Try again.</p>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+  <div class="topbar">
+    <div class="topbar-brand">PEEKEY <span>Admin Panel</span></div>
+    <div class="topbar-actions">
+      <a href="index.html" class="tbtn"><i class="fas fa-store"></i> View Site</a>
+      <button class="tbtn" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat"><div class="n" id="sTotal">0</div><div class="l">Total Products</div></div>
+      <div class="stat"><div class="n" id="sCats">0</div><div class="l">Categories</div></div>
+      <div class="stat"><div class="n" id="sWeek">0</div><div class="l">Added This Week</div></div>
+      <div class="stat"><div class="n" id="sCloud" style="color:var(--green)">●</div><div class="l">Cloud Status</div></div>
+    </div>
+
+    <!-- Upload -->
+    <div class="ucard">
+      <div class="ucard-title"><i class="fas fa-cloud-arrow-up"></i> Upload Product Images</div>
+      <div class="ucard-sub">Images are automatically sorted into the correct category on the website.</div>
+
+      <!-- imgbb Config -->
+      <div class="cfg-toggle" onclick="toggleCfg()">
+        <i class="fas fa-gear" id="cfgIcon"></i> ⚙️ Image Storage API Key
+        <span id="cfgStatusBadge" style="color:var(--green);margin-left:6px"></span>
+      </div>
+      <div class="cfg-box" id="cfgBox">
+        <p style="color:var(--muted);font-size:.82rem;margin-bottom:12px">Configure your API key from <a href="https://api.imgbb.com" target="_blank" style="color:var(--red)">api.imgbb.com</a> below.</p>
+        <div class="cfg-row">
+          <div class="ufg" style="grid-column:1/-1"><label>imgbb API Key</label><input id="cfgKey" placeholder="Paste your imgbb API key here" type="password"></div>
+        </div>
+        <button class="ubtn" onclick="saveCfg()" style="margin-top:10px"><i class="fas fa-save"></i> Save API Key</button>
+        <div class="cfg-status" id="cfgStatus"></div>
+      </div>
+
+      <div class="urow" style="grid-template-columns: repeat(3, 1fr); gap: 16px;">
+        <div class="ufg">
+          <label>Product Name</label>
+          <input id="uName" placeholder="e.g. Pressure Cooker 5L" oninput="autoDetectCat(this.value)">
+          <div class="auto-detect" id="autoDetect"><i class="fas fa-magic"></i> Auto-detected category</div>
+        </div>
+        <div class="ufg">
+          <label>MRP / Price (₹)</label>
+          <input id="uPrice" placeholder="e.g. 1999">
+        </div>
+        <div class="ufg">
+          <label>Category</label>
+          <select id="uCat">
+            <option value="Home Appliances">🔌 Home Appliances</option>
+            <option value="Kitchenware">🍳 Kitchenware</option>
+            <option value="Crockery & Dining">🍽️ Crockery &amp; Dining</option>
+            <option value="Pooja & Devotional">🪔 Pooja &amp; Devotional</option>
+            <option value="Home Essentials">🏠 Home Essentials</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="dropzone" id="dz" onclick="document.getElementById('fInput').click()">
+        <i class="fas fa-images"></i>
+        <p><span>Click to browse</span> or drag &amp; drop images here</p>
+        <p style="font-size:.75rem;margin-top:6px;color:#3a4060">PNG · JPG · WEBP · Multiple files supported</p>
+      </div>
+      <input type="file" id="fInput" accept="image/*" multiple>
+
+      <div class="previews" id="previews"></div>
+      <div class="pbwrap" id="pbwrap"><div class="pbfill" id="pbfill"></div></div>
+
+      <div class="uactions">
+        <button class="ubtn" id="uploadBtn" onclick="doUpload()" disabled>
+          <i class="fas fa-cloud-upload-alt"></i> Upload to Cloud
+        </button>
+        <button class="tbtn" onclick="clearFiles()"><i class="fas fa-trash"></i> Clear</button>
+      </div>
+    </div>
+
+    <!-- Product Grid -->
+    <div class="ucard">
+      <div class="ucard-title"><i class="fas fa-th"></i> All Uploaded Products</div>
+      <div class="ucard-sub">Manage images currently live on your website.</div>
+      <div class="cat-filter" id="catFilter"></div>
+      <div class="pgrid" id="pgrid"></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"><i class="fas fa-check-circle"></i><span id="toastMsg"></span></div>
+
+<script>
+// ── CONFIG ─────────────────────────────────────────────────────────
+const CREDS = { user: 'admin', pass: 'peekey@2024' };
+const SK = 'peekey_products_v2';
+const CK = { key: 'pk_imgbb_key' };
+
+// Auto-detect category from product name keywords
+const CAT_KEYWORDS = {
+  'Home Appliances': ['mixer','grinder','juicer','rice cooker','air fryer','toaster','sandwich','water heater','exhaust fan','purifier','iron','blender','oven','microwave','induction','cooktop','fan','heater'],
+  'Kitchenware': ['cooker','pressure','pan','tawa','wok','kadai','pot','cookware','saucepan','stockpot','milk boiler','appam','dosa','cast iron','triply','non-stick','knife','knives','chopping','board','grater','mortar','pestle','spoon','spatula','ladle','brass utensil','brass bottle'],
+  'Crockery & Dining': ['plate','bowl','mug','cup','glass','jug','tray','cutlery','fork','spoon set','dessert','cake stand','serving','dinner set','ceramic','porcelain'],
+  'Pooja & Devotional': ['vilakku','nilavilakku','lamp','pooja','thali','kalash','panchapathram','bell','incense','diya','agarbatti','brass bell'],
+  'Home Essentials': ['bucket','bottle','flask','lunch box','storage','jar','container','chair','rack','shelf','dustbin','laundry','basket','shoe rack','cleaning','brush','mop','broom','water bottle','steel bottle','vacuum']
+};
+
+function detectCategory(name) {
+  const n = name.toLowerCase();
+  for (const [cat, kws] of Object.entries(CAT_KEYWORDS)) {
+    if (kws.some(k => n.includes(k))) return cat;
+  }
+  return null;
+}
+
+// ── AUTH ───────────────────────────────────────────────────────────
+function doLogin() {
+  const u = document.getElementById('lUser').value.trim();
+  const p = document.getElementById('lPass').value;
+  if (u === CREDS.user && p === CREDS.pass) {
+    sessionStorage.setItem('pk_admin', '1');
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    initDash();
+  } else {
+    document.getElementById('lerr').style.display = 'block';
+  }
+}
+function doLogout() { sessionStorage.removeItem('pk_admin'); location.reload(); }
+
+if (sessionStorage.getItem('pk_admin')) {
+  document.getElementById('loginPage').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  window.addEventListener('DOMContentLoaded', initDash);
+}
+
+// ── INIT ───────────────────────────────────────────────────────────
+function initDash() {
+  const key = localStorage.getItem(CK.key) || '';
+  document.getElementById('cfgKey').value = key;
+  if (key) {
+    document.getElementById('cfgStatusBadge').textContent = '✓ Connected';
+    document.getElementById('cfgStatus').textContent = '✓ imgbb API key saved';
+    document.getElementById('sCloud').textContent = '✓';
+  } else {
+    // Auto-open config if not set
+    document.getElementById('cfgBox').classList.add('open');
+  }
+  renderGrid('All');
+  updateStats();
+}
+
+// ── CONFIG ─────────────────────────────────────────────────────────
+function toggleCfg() {
+  const box = document.getElementById('cfgBox');
+  box.classList.toggle('open');
+  document.getElementById('cfgIcon').style.transform = box.classList.contains('open') ? 'rotate(90deg)' : '';
+}
+function saveCfg() {
+  const key = document.getElementById('cfgKey').value.trim();
+  if (!key) { showToast('Paste your imgbb API key!', 'err'); return; }
+  localStorage.setItem(CK.key, key);
+  document.getElementById('cfgStatusBadge').textContent = '✓ Connected';
+  document.getElementById('cfgStatus').textContent = '✓ API key saved!';
+  document.getElementById('sCloud').textContent = '✓';
+  document.getElementById('cfgBox').classList.remove('open');
+  showToast('API key saved! You can now upload images.', 'ok');
+}
+
+// ── AUTO DETECT ────────────────────────────────────────────────────
+function autoDetectCat(val) {
+  const cat = detectCategory(val);
+  const sel = document.getElementById('uCat');
+  const msg = document.getElementById('autoDetect');
+  if (cat) {
+    sel.value = cat;
+    msg.style.display = 'block';
+    msg.textContent = '✨ Auto-sorted to: ' + cat;
+  } else {
+    msg.style.display = 'none';
+  }
+}
+
+// ── FILE HANDLING ──────────────────────────────────────────────────
+let selFiles = [];
+
+document.getElementById('dz').addEventListener('dragover', e => { e.preventDefault(); e.currentTarget.classList.add('over'); });
+document.getElementById('dz').addEventListener('dragleave', e => e.currentTarget.classList.remove('over'));
+document.getElementById('dz').addEventListener('drop', e => { e.preventDefault(); e.currentTarget.classList.remove('over'); addFiles([...e.dataTransfer.files]); });
+document.getElementById('fInput').addEventListener('change', e => { addFiles([...e.target.files]); e.target.value = ''; });
+
+function addFiles(files) {
+  files = files.filter(f => f.type.startsWith('image/'));
+  selFiles = [...selFiles, ...files];
+  // Auto-detect from first file name if product name is empty
+  if (!document.getElementById('uName').value && files[0]) {
+    const guess = files[0].name.replace(/\.(png|jpg|jpeg|webp)$/i, '').replace(/[-_]/g, ' ');
+    document.getElementById('uName').value = guess;
+    autoDetectCat(guess);
+  }
+  renderPreviews();
+  document.getElementById('uploadBtn').disabled = selFiles.length === 0;
+}
+
+function renderPreviews() {
+  document.getElementById('previews').innerHTML = selFiles.map((f, i) =>
+    `<div class="pitem"><img src="${URL.createObjectURL(f)}"><button class="px" onclick="rmFile(${i})"><i class="fas fa-xmark"></i></button></div>`
+  ).join('');
+}
+
+function rmFile(i) { selFiles.splice(i, 1); renderPreviews(); document.getElementById('uploadBtn').disabled = !selFiles.length; }
+function clearFiles() { selFiles = []; renderPreviews(); document.getElementById('uploadBtn').disabled = true; document.getElementById('uName').value = ''; document.getElementById('autoDetect').style.display = 'none'; }
+
+// ── UPLOAD via imgbb ───────────────────────────────────────────────
+async function doUpload() {
+  const name = document.getElementById('uName').value.trim();
+  const cat = document.getElementById('uCat').value;
+  const apiKey = localStorage.getItem(CK.key) || '';
+  if (!name) { showToast('Enter a product name!', 'err'); return; }
+  if (!apiKey) {
+    document.getElementById('cfgBox').classList.add('open');
+    showToast('⚙️ Paste your imgbb API key first!', 'err');
+    return;
+  }
+  if (!selFiles.length) { showToast('Select images to upload!', 'err'); return; }
+
+  const btn = document.getElementById('uploadBtn');
+  const pbw = document.getElementById('pbwrap');
+  const pbf = document.getElementById('pbfill');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+  pbw.style.display = 'block';
+
+  const products = getProducts();
+  let done = 0;
+  for (const file of selFiles) {
+    try {
+      // Convert to base64
+      const b64 = await toBase64(file);
+      const fd = new FormData();
+      fd.append('key', apiKey);
+      fd.append('image', b64.split(',')[1]); // strip data:...;base64,
+      fd.append('name', name.replace(/\s+/g,'-'));
+      const r = await fetch('https://api.imgbb.com/1/upload', { method: 'POST', body: fd });
+      const d = await r.json();
+      if (d.success && d.data?.url) {
+        const price = document.getElementById('uPrice').value.trim();
+        products.push({ id: d.data.id, name, price, category: cat, url: d.data.display_url || d.data.url, at: Date.now() });
+      } else {
+        showToast('Upload error: ' + (d.error?.message || 'Check API key'), 'err');
+      }
+    } catch(e) { showToast('Network error. Check internet.', 'err'); }
+    done++;
+    pbf.style.width = Math.round(done / selFiles.length * 100) + '%';
+  }
+
+  saveProducts(products);
+  clearFiles();
+  document.getElementById('uPrice').value = '';
+  btn.disabled = false;
+  btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Upload to Cloud';
+  pbw.style.display = 'none'; pbf.style.width = '0';
+  showToast(`✅ ${done} image(s) uploaded & live on website!`, 'ok');
+  renderGrid(currentFilter);
+  updateStats();
+}
+
+function toBase64(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+
+// ── GRID ───────────────────────────────────────────────────────────
+let currentFilter = 'All';
+function renderGrid(filter) {
+  currentFilter = filter;
+  const products = getProducts();
+  const filtered = filter === 'All' ? products : products.filter(p => p.category === filter);
+
+  // Filter buttons
+  const cats = ['All', ...new Set(products.map(p => p.category))];
+  document.getElementById('catFilter').innerHTML = cats.map(c =>
+    `<button class="cfbtn ${c === filter ? 'active' : ''}" onclick="renderGrid('${c}')">${c}</button>`
+  ).join('');
+
+  // Grid
+  const grid = document.getElementById('pgrid');
+  if (!filtered.length) {
+    grid.innerHTML = `<div class="empty"><i class="fas fa-box-open"></i>No products yet. Upload some images above!</div>`;
+    return;
+  }
+  grid.innerHTML = filtered.map((p, i) => {
+    const ri = products.indexOf(p);
+    return `<div class="pcard" style="background:var(--convex-bg);border:1px solid rgba(255,255,255,0.6);border-radius:14px;overflow:hidden;padding:12px;display:flex;flex-direction:column;gap:8px;">
+      <img src="${p.url}" alt="${p.name}" style="width:100%;height:100px;object-fit:contain;border-radius:8px;">
+      <div class="pcard-body" style="padding:0;display:flex;flex-direction:column;gap:6px;">
+        <div>
+          <label style="font-size:0.65rem;color:var(--text-gray);font-weight:700;display:block;margin-bottom:2px;text-transform:uppercase;">Product Name</label>
+          <input type="text" value="${p.name}" onchange="updateProduct(${ri}, 'name', this.value)" style="width:100%;padding:4px 8px;border:1px solid var(--border);border-radius:6px;font-size:0.8rem;outline:none;">
+        </div>
+        <div>
+          <label style="font-size:0.65rem;color:var(--text-gray);font-weight:700;display:block;margin-bottom:2px;text-transform:uppercase;">MRP / Price (₹)</label>
+          <input type="text" value="${p.price || ''}" placeholder="e.g. 1999" onchange="updateProduct(${ri}, 'price', this.value)" style="width:100%;padding:4px 8px;border:1px solid var(--border);border-radius:6px;font-size:0.8rem;outline:none;">
+        </div>
+        <div>
+          <label style="font-size:0.65rem;color:var(--text-gray);font-weight:700;display:block;margin-bottom:2px;text-transform:uppercase;">Category</label>
+          <select onchange="updateProduct(${ri}, 'category', this.value)" style="width:100%;padding:4px;border:1px solid var(--border);border-radius:6px;font-size:0.8rem;outline:none;cursor:pointer;">
+            <option value="Home Appliances" ${p.category==='Home Appliances'?'selected':''}>🔌 Home Appliances</option>
+            <option value="Kitchenware" ${p.category==='Kitchenware'?'selected':''}>🍳 Kitchenware</option>
+            <option value="Crockery & Dining" ${p.category==='Crockery & Dining'?'selected':''}>🍽️ Crockery & Dining</option>
+            <option value="Pooja & Devotional" ${p.category==='Pooja & Devotional'?'selected':''}>🪔 Pooja & Devotional</option>
+            <option value="Home Essentials" ${p.category==='Home Essentials'?'selected':''}>🏠 Home Essentials</option>
+          </select>
+        </div>
+        <button class="pdel" onclick="delProduct(${ri})" style="width:100%;margin-top:4px;"><i class="fas fa-trash"></i> Remove</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function updateProduct(index, field, value) {
+  const products = getProducts();
+  if (products[index]) {
+    products[index][field] = value;
+    saveProducts(products);
+    showToast('Product updated!', 'ok');
+    updateStats();
+  }
+}
+
+function delProduct(i) {
+  if (!confirm('Remove this product from the website?')) return;
+  const products = getProducts();
+  products.splice(i, 1);
+  saveProducts(products);
+  showToast('Product removed', 'ok');
+  renderGrid(currentFilter);
+  updateStats();
+}
+
+function updateStats() {
+  const p = getProducts();
+  document.getElementById('sTotal').textContent = p.length;
+  document.getElementById('sCats').textContent = new Set(p.map(x => x.category)).size;
+  const wk = Date.now() - 7 * 86400000;
+  document.getElementById('sWeek').textContent = p.filter(x => x.at > wk).length;
+}
+
+// ── STORAGE ────────────────────────────────────────────────────────
+const DEFAULT_PRODUCTS = [
+  { id: "def-mixer", name: "Mixer Grinder", category: "Home Appliances", url: "assets/inventory/Mixer Grinder.png", price: "", at: 1718360000000 },
+  { id: "def-wet", name: "Wet Grinder", category: "Home Appliances", url: "assets/inventory/Wet Grinder.png", price: "", at: 1718360000000 },
+  { id: "def-juicer", name: "Juicer", category: "Home Appliances", url: "assets/inventory/Juicer.png", price: "", at: 1718360000000 },
+  { id: "def-rice", name: "Rice Cooker", category: "Home Appliances", url: "assets/inventory/Rice Cooker.png", price: "", at: 1718360000000 },
+  { id: "def-air", name: "Air Fryer", category: "Home Appliances", url: "assets/inventory/Air Fryer.png", price: "", at: 1718360000000 },
+  { id: "def-toaster", name: "Toaster", category: "Home Appliances", url: "assets/inventory/Toaster.png", price: "", at: 1718360000000 },
+  { id: "def-sandwich", name: "Sandwich Maker", category: "Home Appliances", url: "assets/inventory/Sandwich Maker.png", price: "", at: 1718360000000 },
+  { id: "def-heater", name: "Water Heater", category: "Home Appliances", url: "assets/inventory/Water Heater.png", price: "", at: 1718360000000 },
+  { id: "def-fan", name: "Exhaust Fan", category: "Home Appliances", url: "assets/inventory/Exhaust Fan.png", price: "", at: 1718360000000 },
+  { id: "def-purifier", name: "Water Purifier", category: "Home Appliances", url: "assets/inventory/Water Purifier.png", price: "", at: 1718360000000 },
+  { id: "def-triply", name: "Triply Cookware", category: "Kitchenware", url: "assets/inventory/Triply Cookware.png", price: "", at: 1718360000000 },
+  { id: "def-cast", name: "Cast Iron Cookware", category: "Kitchenware", url: "assets/inventory/Cast Iron Cookware.png", price: "", at: 1718360000000 },
+  { id: "def-nonstick", name: "Non-Stick Cookware", category: "Kitchenware", url: "assets/inventory/Non-Stick Cookware.png", price: "", at: 1718360000000 },
+  { id: "def-fry", name: "Fry Pan", category: "Kitchenware", url: "assets/inventory/Fry Pan.png", price: "", at: 1718360000000 },
+  { id: "def-tawa", name: "Dosa Tawa", category: "Kitchenware", url: "assets/inventory/Dosa Tawa.png", price: "", at: 1718360000000 },
+  { id: "def-appam", name: "Appam Pan", category: "Kitchenware", url: "assets/inventory/Appam Pan.png", price: "", at: 1718360000000 },
+  { id: "def-sauce", name: "Sauce Pan", category: "Kitchenware", url: "assets/inventory/Sauce Pan.png", price: "", at: 1718360000000 },
+  { id: "def-stock", name: "Stock Pot", category: "Kitchenware", url: "assets/inventory/Stock Pot.png", price: "", at: 1718360000000 },
+  { id: "def-boiler", name: "Milk Boiler", category: "Kitchenware", url: "assets/inventory/Milk Boiler.png", price: "", at: 1718360000000 },
+  { id: "def-copper", name: "Copper Bottles", category: "Kitchenware", url: "assets/inventory/brass bottle.png", price: "", at: 1718360000000 },
+  { id: "def-brass", name: "Brass Utensils", category: "Kitchenware", url: "assets/inventory/Brass Utensils.png", price: "", at: 1718360000000 },
+  { id: "def-wooden", name: "Wooden Spoons", category: "Kitchenware", url: "assets/inventory/Wooden Spoon.png", price: "", at: 1718360000000 },
+  { id: "def-chop", name: "Chopping Boards", category: "Kitchenware", url: "assets/inventory/Chopping Boards.png", price: "", at: 1718360000000 },
+  { id: "def-knives", name: "Kitchen Knives", category: "Kitchenware", url: "assets/inventory/Kitchen Knives.png", price: "", at: 1718360000000 },
+  { id: "def-graters", name: "Graters", category: "Kitchenware", url: "assets/inventory/Graters.png", price: "", at: 1718360000000 },
+  { id: "def-mortar", name: "Mortar & Pestle", category: "Kitchenware", url: "assets/inventory/Mortar and Pestle.png", price: "", at: 1718360000000 },
+  { id: "def-cplates", name: "Ceramic Plates", category: "Crockery & Dining", url: "assets/inventory/Ceramic Plates.png", price: "", at: 1718360000000 },
+  { id: "def-ssplates", name: "SS Plates", category: "Crockery & Dining", url: "assets/inventory/Stainless Steel Plates.png", price: "", at: 1718360000000 },
+  { id: "def-sbowls", name: "Soup Bowls", category: "Crockery & Dining", url: "assets/inventory/Soup Bowls.png", price: "", at: 1718360000000 },
+  { id: "def-svbowls", name: "Serving Bowls", category: "Crockery & Dining", url: "assets/inventory/Serving Bowls.png", price: "", at: 1718360000000 },
+  { id: "def-mugs", name: "Coffee Mugs", category: "Crockery & Dining", url: "assets/inventory/Coffee Mugs.png", price: "", at: 1718360000000 },
+  { id: "def-jugs", name: "Water Jugs", category: "Crockery & Dining", url: "assets/inventory/Water Jugs.png", price: "", at: 1718360000000 },
+  { id: "def-trays", name: "Serving Trays", category: "Crockery & Dining", url: "assets/inventory/Serving Trays.png", price: "", at: 1718360000000 },
+  { id: "def-cutlery", name: "Cutlery Sets", category: "Crockery & Dining", url: "assets/inventory/Cutlery Sets.png", price: "", at: 1718360000000 },
+  { id: "def-spoons", name: "Spoons", category: "Crockery & Dining", url: "assets/inventory/Spoons.png", price: "", at: 1718360000000 },
+  { id: "def-stands", name: "Cake Stands", category: "Crockery & Dining", url: "assets/inventory/Cake Stands.png", price: "", at: 1718360000000 },
+  { id: "def-dplates", name: "Dessert Plates", category: "Crockery & Dining", url: "assets/inventory/Dessert Plates.png", price: "", at: 1718360000000 },
+  { id: "def-containers", name: "Storage Containers", category: "Crockery & Dining", url: "assets/inventory/Storage Containers.png", price: "", at: 1718360000000 },
+  { id: "def-nilavilakku", name: "Kerala Nilavilakku", category: "Pooja & Devotional", url: "assets/inventory/Kerala Nilavilakku.png", price: "", at: 1718360000000 },
+  { id: "def-bvilakku", name: "Brass Vilakku", category: "Pooja & Devotional", url: "assets/inventory/Brass Vilakku.png", price: "", at: 1718360000000 },
+  { id: "def-kvilakku", name: "Kuthu Vilakku", category: "Pooja & Devotional", url: "assets/inventory/Kuthu Vilakku.png", price: "", at: 1718360000000 },
+  { id: "def-bell", name: "Brass Bell", category: "Pooja & Devotional", url: "assets/inventory/Brass Bell.png", price: "", at: 1718360000000 },
+  { id: "def-thali", name: "Pooja Thali", category: "Pooja & Devotional", url: "assets/inventory/Pooja Thali.png", price: "", at: 1718360000000 },
+  { id: "def-kalash", name: "Copper Kalash", category: "Pooja & Devotional", url: "assets/inventory/Copper Kalash.png", price: "", at: 1718360000000 },
+  { id: "def-panchapathram", name: "Panchapathram Set", category: "Pooja & Devotional", url: "assets/inventory/Panchapathram Set.png", price: "", at: 1718360000000 },
+  { id: "def-wbottle", name: "Water Bottles", category: "Home Essentials", url: "assets/inventory/water bottle.png", price: "", at: 1718360000000 },
+  { id: "def-sbottle", name: "Steel Bottles", category: "Home Essentials", url: "assets/inventory/steel water bottle.png", price: "", at: 1718360000000 },
+  { id: "def-flask", name: "Vacuum Flasks", category: "Home Essentials", url: "assets/inventory/vacuum flask.png", price: "", at: 1718360000000 },
+  { id: "def-lunch", name: "Lunch Boxes", category: "Home Essentials", url: "assets/inventory/lunch box.png", price: "", at: 1718360000000 },
+  { id: "def-fstorage", name: "Food Storage", category: "Home Essentials", url: "assets/inventory/Food Storage Containers.png", price: "", at: 1718360000000 },
+  { id: "def-jars", name: "Storage Jars", category: "Home Essentials", url: "assets/inventory/Kitchen Storage Jars.png", price: "", at: 1718360000000 },
+  { id: "def-pchairs", name: "Plastic Chairs", category: "Home Essentials", url: "assets/inventory/Plastic Chairs.png", price: "", at: 1718360000000 },
+  { id: "def-fchairs", name: "Folding Chairs", category: "Home Essentials", url: "assets/inventory/foldable Chairs.png", price: "", at: 1718360000000 },
+  { id: "def-bins", name: "Dustbins", category: "Home Essentials", url: "assets/inventory/Dustbins.png", price: "", at: 1718360000000 },
+  { id: "def-baskets", name: "Laundry Baskets", category: "Home Essentials", url: "assets/inventory/Laundry Baskets.png", price: "", at: 1718360000000 },
+  { id: "def-kracks", name: "Kitchen Racks", category: "Home Essentials", url: "assets/inventory/Kitchen Racks.png", price: "", at: 1718360000000 },
+  { id: "def-sracks", name: "Shoe Racks", category: "Home Essentials", url: "assets/inventory/Shoe Racks.png", price: "", at: 1718360000000 },
+  { id: "def-buckets", name: "Buckets", category: "Home Essentials", url: "assets/inventory/Buckets.png", price: "", at: 1718360000000 },
+  { id: "def-brushes", name: "Cleaning Brushes", category: "Home Essentials", url: "assets/inventory/Cleaning Brushes.png", price: "", at: 1718360000000 }
+];
+
+if (!localStorage.getItem('pk_initialized')) {
+  localStorage.setItem(SK, JSON.stringify(DEFAULT_PRODUCTS));
+  localStorage.setItem('pk_initialized', '1');
+}
+
+function getProducts() { try { return JSON.parse(localStorage.getItem(SK) || '[]'); } catch { return []; } }
+function saveProducts(arr) { localStorage.setItem(SK, JSON.stringify(arr)); }
+
+// ── TOAST ──────────────────────────────────────────────────────────
+function showToast(msg, type = 'ok') {
+  const t = document.getElementById('toast');
+  t.querySelector('i').className = type === 'ok' ? 'fas fa-check-circle' : 'fas fa-circle-xmark';
+  document.getElementById('toastMsg').textContent = msg;
+  t.className = 'show ' + type;
+  setTimeout(() => t.className = '', 3500);
+}
+</script>
+</body>
+</html>
