@@ -12,7 +12,7 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=1003">
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -252,11 +252,54 @@
         <div class="sidebar-logo">
             <h2 style="color:var(--red); font-weight:900; font-size: 2rem;">PEEKEY</h2>
         </div>
-        <ul class="sidebar-nav">
+        <ul class="sidebar-nav" style="margin-bottom: 25px;">
             <li><a href="#brands" class="sidebar-link"><i class="fas fa-tags"></i> Brands</a></li>
             <li><a href="#offers" class="sidebar-link"><i class="fas fa-percent"></i> Offers</a></li>
             <li><a href="#contact" class="sidebar-link"><i class="fas fa-phone-alt"></i> Contact Us</a></li>
         </ul>
+
+        <!-- Sidebar Cart & Wishlist Section -->
+        <div class="sidebar-cart-wishlist" style="border-top:1px solid #eee; padding-top:20px; margin-top:20px;">
+            <!-- Cart Box -->
+            <div class="page-cart-box" style="margin-bottom: 30px;">
+                <h3 style="font-size:1.15rem; font-weight:700; color:#1e293b; margin-bottom:15px; display:flex; align-items:center; gap:8px; border-bottom:2px solid #f1f5f9; padding-bottom:8px;">
+                    <i class="fas fa-shopping-cart" style="color:var(--red);"></i> Shopping Cart (<span id="page-cart-count">0</span>)
+                </h3>
+                <div id="page-cart-items" style="display:flex; flex-direction:column; gap:12px; margin-bottom:15px;">
+                    <!-- Cart items rendered dynamically -->
+                </div>
+                <div id="page-cart-summary" style="display:none; border-top:1px solid #f1f5f9; padding-top:15px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; font-size:1rem; font-weight:700; color:#1e293b; margin-bottom:15px;">
+                        <span>Subtotal:</span>
+                        <span id="page-cart-total" style="color:var(--red); font-size:1.15rem;">₹0</span>
+                    </div>
+                    
+                    <!-- Sleek Inline Checkout Form inside Sidebar -->
+                    <div class="inline-checkout-form" style="background:#f8fafc; border-radius:10px; padding:12px; border:1px solid #cbd5e1; margin-bottom:15px;">
+                        <h4 style="font-size:0.85rem; font-weight:700; color:#475569; margin-bottom:10px; text-transform:uppercase; letter-spacing:0.5px; margin-top:0;">Delivery Details</h4>
+                        <div style="display:flex; flex-direction:column; gap:8px;">
+                            <input type="text" id="checkout-name" placeholder="Your Name" style="width:100%; padding:8px 10px; border-radius:6px; border:1px solid #cbd5e1; font-size:0.85rem; font-family:inherit;">
+                            <input type="text" id="checkout-phone" placeholder="WhatsApp Number" style="width:100%; padding:8px 10px; border-radius:6px; border:1px solid #cbd5e1; font-size:0.85rem; font-family:inherit;">
+                            <textarea id="checkout-address" placeholder="Delivery Address" rows="2" style="width:100%; padding:8px 10px; border-radius:6px; border:1px solid #cbd5e1; font-size:0.85rem; font-family:inherit; resize:vertical;"></textarea>
+                        </div>
+                    </div>
+                    
+                    <button class="btn-orange w-100" id="page-checkout-btn" style="background:var(--green); border-color:var(--green); font-size:0.95rem; padding:10px; display:flex; align-items:center; justify-content:center; gap:6px; border-radius:20px; font-weight:700; color:#fff; cursor:pointer; width:100%; border:none;">
+                        <i class="fab fa-whatsapp"></i> Buy All via WhatsApp
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Wishlist Box -->
+            <div class="page-wishlist-box">
+                <h3 style="font-size:1.15rem; font-weight:700; color:#1e293b; margin-bottom:15px; display:flex; align-items:center; gap:8px; border-bottom:2px solid #f1f5f9; padding-bottom:8px;">
+                    <i class="fas fa-heart" style="color:var(--red);"></i> My Wishlist (<span id="page-wishlist-count">0</span>)
+                </h3>
+                <div id="page-wishlist-items" style="display:flex; flex-direction:column; gap:12px;">
+                    <!-- Wishlist items rendered dynamically -->
+                </div>
+            </div>
+        </div>
     </div>
 
 
@@ -856,10 +899,10 @@
         </div>
     </footer>
 
-    <script src="main.js"></script>
-    <script src="ecommerce.js"></script>
-    <script src="cloud-images.js"></script>
-    <script src="desc-popup.js"></script>
+    <script src="main.js?v=1003"></script>
+    <script src="ecommerce.js?v=1004"></script>
+    <script src="cloud-images.js?v=1003"></script>
+    <script src="desc-popup.js?v=1003"></script>
     <script>CloudImages.applyToPage();</script>
     <script>
     // Load admin-uploaded cloud products into the correct shelf sections
@@ -1246,6 +1289,9 @@
           // Click on card (not image) → admin Quick Edit or user WA modal
           // Image clicks are intercepted by desc-popup.js before reaching here
           el.onclick = function(e) {
+            if (e.target.closest('.shelf-actions')) {
+              return;
+            }
             if(sessionStorage.getItem('pk_user_email') === ADMIN_EMAIL) {
               e.preventDefault();
               openQuickEdit(idx);
@@ -1261,10 +1307,15 @@
 
           el.innerHTML = `
             <div class="item-image-placeholder">
-              <img src="${p.url}" alt="${p.name}" loading="lazy">
+              <img src="${p.url}" alt="${p.name}" loading="lazy"
+                onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'80\' height=\'80\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%23cbd5e1\' stroke-width=\'1.5\'><rect x=\'3\' y=\'3\' width=\'18\' height=\'18\' rx=\'2\'/><circle cx=\'8.5\' cy=\'8.5\' r=\'1.5\'/><polyline points=\'21 15 16 10 5 21\'/></svg>';this.style.padding='20px';this.style.background='#f1f5f9';">
             </div>
             <div class="item-name">${p.name}</div>
-            ${p.price ? `<div class="item-price" style="color:#ad1f35;font-weight:700;font-size:0.85rem;margin-top:4px;text-align:center;">₹${p.price}</div>` : ''}
+            ${p.price ? `<div class="item-price" style="color:#ad1f35;font-weight:700;font-size:0.85rem;margin-top:4px;text-align:center;">₹${p.price}</div>` : '<div class="item-price" style="color:#666;font-size:0.75rem;margin-top:4px;text-align:center;">Ask Price</div>'}
+            <div class="shelf-actions">
+              <button class="shelf-wishlist-btn" title="Add to Wishlist"><i class="far fa-heart"></i></button>
+              <button class="shelf-cart-btn" title="Add to Cart"><i class="fas fa-shopping-cart"></i></button>
+            </div>
           `;
           shelf.appendChild(el);
         });
@@ -1274,6 +1325,9 @@
         if (!searchInitialized) {
           initializeSearchFilter();
           searchInitialized = true;
+        }
+        if (window.updateProductCardStatus) {
+          window.updateProductCardStatus();
         }
       }
 
@@ -2098,13 +2152,15 @@ document.getElementById('signInOverlay').addEventListener('click', e=>{ if(e.tar
         fd.append('name',name.replace(/\s+/g,'-'));
         const res=await fetch('https://api.imgbb.com/1/upload',{method:'POST',body:fd});
         const data=await res.json();
-        if(data.success&&data.data?.url){
+        if(data.success && data.data?.url){
+          // Prefer display_url (direct CDN link), fall back to url
+          const imgUrl = data.data.display_url || data.data.medium?.url || data.data.url;
           const p={
             id:data.data.id,
             name,
             price,
             category:cat,
-            url:data.data.display_url||data.data.url,
+            url: imgUrl,
             descUrl: descUrl || undefined,
             at:Date.now()
           };
@@ -2139,7 +2195,8 @@ document.getElementById('signInOverlay').addEventListener('click', e=>{ if(e.tar
     }
     grid.innerHTML=products.map((p,i)=>`
       <div class="ap-card" style="background:#111522;border:1px solid #2a2f42;border-radius:10px;overflow:hidden;padding:10px;">
-        <img src="${p.url}" alt="${p.name}" style="width:100%;height:80px;object-fit:cover;border-radius:6px;margin-bottom:8px;">
+        <img src="${p.url}" alt="${p.name}" style="width:100%;height:80px;object-fit:cover;border-radius:6px;margin-bottom:8px;"
+          onerror="this.onerror=null;this.style.objectFit='contain';this.style.background='#1e2435';this.style.padding='10px';this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'60\\' height=\\'60\\' viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'%234a5568\\' stroke-width=\\'1.5\\'><rect x=\\'3\\' y=\\'3\\' width=\\'18\\' height=\\'18\\' rx=\\'2\\'/><circle cx=\\'8.5\\' cy=\\'8.5\\' r=\\'1.5\\'/><polyline points=\\'21 15 16 10 5 21\\'/></svg>'">
         <div class="ap-card-body" style="padding:0;">
           <div style="font-size:0.65rem;color:#7a8099;margin-bottom:2px;text-transform:uppercase;font-weight:600;">Product Name</div>
           <input type="text" value="${p.name}" onchange="apUpdateItem(${i}, 'name', this.value)" style="width:100%;background:#161b27;border:1px solid #2a2f42;color:#fff;border-radius:4px;padding:4px 6px;font-size:0.75rem;font-family:'Outfit',sans-serif;margin-bottom:6px;outline:none;">
@@ -2311,7 +2368,8 @@ document.getElementById('signInOverlay').addEventListener('click', e=>{ if(e.tar
           const res = await fetch('https://api.imgbb.com/1/upload', {method:'POST', body:fd});
           const data = await res.json();
           if (data.success && data.data?.url) {
-            p.url = data.data.display_url || data.data.url;
+            // Use the highest-quality direct URL from imgbb
+            p.url = data.data.display_url || data.data.medium?.url || data.data.url;
           }
         } catch(e) { apToast('Error uploading new product image', 'err'); }
       }
@@ -2327,7 +2385,7 @@ document.getElementById('signInOverlay').addEventListener('click', e=>{ if(e.tar
           const res = await fetch('https://api.imgbb.com/1/upload', {method:'POST', body:fd});
           const data = await res.json();
           if (data.success && data.data?.url) {
-            p.descUrl = data.data.display_url || data.data.url;
+            p.descUrl = data.data.display_url || data.data.medium?.url || data.data.url;
           }
         } catch(e) { apToast('Error uploading new description image', 'err'); }
       }

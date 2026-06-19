@@ -1548,6 +1548,17 @@ ul {
         flex-direction: column;
     }
 
+    .promo-left {
+        width: 100% !important;
+        height: 250px !important;
+    }
+
+    .promo-left img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
     .promo-right {
         padding: 30px;
         text-align: center;
@@ -1713,10 +1724,10 @@ ul {
         gap: 8px !important;
     }
     .header-logo-icon {
-        height: 40px !important;
+        height: 28px !important;
     }
     .header-logo-banner {
-        height: 30px !important;
+        height: 38px !important;
     }
     
     .ts-actions {
@@ -1735,6 +1746,13 @@ ul {
     :root {
         --hero-heading-size: 2.2rem;
         --hero-desc-size: 0.95rem;
+    }
+    .hero-main-img {
+        max-height: 360px !important;
+        transform: scale(1.15) !important;
+        margin: 15px auto 25px !important;
+        display: block;
+        width: 100% !important;
     }
 }
 
@@ -1768,7 +1786,7 @@ ul {
 .right-notch-btn:hover { background: var(--red); width: 35px; }
 .right-sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10000; opacity: 0; visibility: hidden; transition: 0.3s; backdrop-filter: blur(3px); }
 .right-sidebar-overlay.active { opacity: 1; visibility: visible; }
-.right-sidebar { position: fixed; top: 0; right: -320px; width: 300px; height: 100%; background: #fff; z-index: 10001; transition: 0.4s ease; box-shadow: -5px 0 25px rgba(0,0,0,0.2); display: flex; flex-direction: column; padding: 30px; }
+.right-sidebar { position: fixed; top: 0; right: -420px; width: 360px; max-width: 90%; height: 100%; background: #fff; z-index: 10001; transition: 0.4s ease; box-shadow: -5px 0 25px rgba(0,0,0,0.2); display: flex; flex-direction: column; padding: 30px; overflow-y: auto; }
 .right-sidebar.active { right: 0; }
 .close-sidebar-btn { position: absolute; top: 20px; right: 20px; background: #f5f5f5; border: none; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: #555; cursor: pointer; transition: 0.3s; }
 .close-sidebar-btn:hover { background: var(--red); color: #fff; transform: rotate(90deg); }
@@ -1805,10 +1823,10 @@ section, [id], .inv-anchor {
         gap: 10px;
     }
     .header-logo-icon {
-        height: 50px !important;
+        height: 35px !important;
     }
     .header-logo-banner {
-        height: 38px !important;
+        height: 45px !important;
     }
     .ts-action-item {
         padding: 8px 12px;
@@ -1930,4 +1948,99 @@ section, [id], .inv-anchor {
 
 .toast-info i {
     color: #3b82f6;
+}
+
+/* E-commerce Shelf Item Action Buttons */
+.shelf-actions {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 8px;
+    width: 100%;
+}
+
+.shelf-wishlist-btn, .shelf-cart-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    background: #fff;
+    color: #444;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    font-size: 0.85rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.shelf-wishlist-btn:hover {
+    background: #ffe4e6;
+    color: #e11d48;
+    border-color: #f43f5e;
+    transform: scale(1.08);
+}
+
+.shelf-cart-btn:hover {
+    background: var(--red-light);
+    color: var(--red);
+    border-color: var(--red);
+    transform: scale(1.08);
+}
+
+/* Mobile Search Bar & Action Circular Buttons */
+@media (max-width: 991px) {
+    .ts-inner {
+        flex-wrap: wrap !important;
+        gap: 12px !important;
+    }
+    
+    .ts-search {
+        display: flex !important; /* Force display since it was display: none */
+        order: 3 !important;
+        flex: 1 1 100% !important;
+        max-width: 100% !important;
+        margin-top: 5px !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .ts-action-item span {
+        display: none !important;
+    }
+    
+    .ts-action-item {
+        padding: 0 !important;
+        width: 38px !important;
+        height: 38px !important;
+        border-radius: 50% !important;
+        justify-content: center !important;
+        background: rgba(255,255,255,0.15) !important;
+        border: 1px solid rgba(255,255,255,0.3) !important;
+    }
+    
+    .ts-actions {
+        gap: 8px !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .search-dropdown {
+        padding: 0 10px !important;
+        font-size: 0.72rem !important;
+    }
+    
+    .ts-search input {
+        padding-left: 10px !important;
+        font-size: 0.82rem !important;
+    }
+}
+
+/* Page level Cart and Wishlist Grid responsiveness */
+@media (max-width: 991px) {
+    .cart-wishlist-grid {
+        grid-template-columns: 1fr !important;
+    }
 }

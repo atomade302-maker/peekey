@@ -55,6 +55,34 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div id="track-result" style="margin-top:20px; font-weight:bold; text-align:center; display:none; padding:15px; border-radius:8px; background:#f5f5f5;"></div>
             </div>
         </div>
+
+        <div id="ecom-checkout-modal" class="modal-overlay ecommerce-modal">
+            <div class="modal-box ecom-modal-box" style="max-width: 450px;">
+                <button class="close-modal-btn ecom-close-btn" data-target="#ecom-checkout-modal"><i class="fas fa-times"></i></button>
+                <h2><i class="fab fa-whatsapp" style="color:var(--green)"></i> Checkout via WhatsApp</h2>
+                <p style="font-size:0.85rem; color:#666; margin-top:5px; margin-bottom:15px;">Please fill in your delivery details to place your order.</p>
+                <div style="display:flex; flex-direction:column; gap:12px;">
+                    <div class="form-group" style="margin:0;">
+                        <label style="font-size:0.8rem; font-weight:700; color:#444; display:block; margin-bottom:4px;">Full Name</label>
+                        <input type="text" id="modal-checkout-name" placeholder="Enter your full name" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc; font-size:0.9rem; font-family:inherit;">
+                    </div>
+                    <div class="form-group" style="margin:0;">
+                        <label style="font-size:0.8rem; font-weight:700; color:#444; display:block; margin-bottom:4px;">WhatsApp Phone Number</label>
+                        <input type="text" id="modal-checkout-phone" placeholder="Enter phone number" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc; font-size:0.9rem; font-family:inherit;">
+                    </div>
+                    <div class="form-group" style="margin:0;">
+                        <label style="font-size:0.8rem; font-weight:700; color:#444; display:block; margin-bottom:4px;">Delivery Address</label>
+                        <textarea id="modal-checkout-address" placeholder="Enter full delivery address with pincode" rows="3" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc; font-size:0.9rem; resize:vertical; font-family:inherit;"></textarea>
+                    </div>
+                    <!-- Hidden fields for single vs multi checkout -->
+                    <input type="hidden" id="checkout-type" value="all">
+                    <input type="hidden" id="checkout-single-title" value="">
+                    <input type="hidden" id="checkout-single-price" value="">
+                    
+                    <button class="btn btn-green w-100" id="modal-confirm-checkout-btn" style="margin-top:10px; font-weight:700; background:var(--green); color:#fff; border:none; padding:12px; border-radius:8px; cursor:pointer;"><i class="fab fa-whatsapp"></i> Confirm & Send Order</button>
+                </div>
+            </div>
+        </div>
     `;
     document.body.insertAdjacentHTML('beforeend', modalsHTML);
 
@@ -87,6 +115,111 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('peekey_cart', JSON.stringify(cart));
         localStorage.setItem('peekey_wishlist', JSON.stringify(wishlist));
         updateBadges();
+        renderCart();
+        renderWishlist();
+        renderPageCart();
+        renderPageWishlist();
+        updateProductCardStatus();
+    }
+
+    window.updateProductCardStatus = function() {
+        // 1. Best Sellers product cards
+        document.querySelectorAll('.product-card-exact').forEach(card => {
+            const titleEl = card.querySelector('.product-title-exact');
+            if (!titleEl) return;
+            const title = titleEl.innerText.trim();
+            
+            const cartBtn = card.querySelector('.cart-btn-exact');
+            const wishlistBtn = card.querySelector('.wishlist-btn-exact');
+            
+            // Check if in cart
+            const inCart = cart.some(item => item.title === title);
+            if (cartBtn) {
+                if (inCart) {
+                    cartBtn.classList.add('active');
+                    cartBtn.style.background = 'var(--red)';
+                    cartBtn.style.color = '#fff';
+                } else {
+                    cartBtn.classList.remove('active');
+                    cartBtn.style.background = '';
+                    cartBtn.style.color = '';
+                }
+            }
+            
+            // Check if in wishlist
+            const inWishlist = wishlist.some(item => item.title === title);
+            if (wishlistBtn) {
+                wishlistBtn.onmouseover = null;
+                wishlistBtn.onmouseout = null;
+                
+                const icon = wishlistBtn.querySelector('i');
+                if (inWishlist) {
+                    wishlistBtn.classList.add('active');
+                    wishlistBtn.style.background = 'var(--red)';
+                    wishlistBtn.style.color = '#fff';
+                    wishlistBtn.style.borderColor = 'var(--red)';
+                    if (icon) {
+                        icon.className = 'fas fa-heart';
+                    }
+                } else {
+                    wishlistBtn.classList.remove('active');
+                    wishlistBtn.style.background = '#fff';
+                    wishlistBtn.style.color = '#ad1f35';
+                    wishlistBtn.style.borderColor = '#ccc';
+                    if (icon) {
+                        icon.className = 'far fa-heart';
+                    }
+                }
+            }
+        });
+
+        // 2. Shelf Items (Catalog) product cards
+        document.querySelectorAll('.shelf-item').forEach(card => {
+            const title = card.getAttribute('data-name') || card.querySelector('.item-name')?.innerText || '';
+            if (!title) return;
+            
+            const cartBtn = card.querySelector('.shelf-cart-btn');
+            const wishlistBtn = card.querySelector('.shelf-wishlist-btn');
+            
+            // Check if in cart
+            const inCart = cart.some(item => item.title === title);
+            if (cartBtn) {
+                if (inCart) {
+                    cartBtn.classList.add('active');
+                    cartBtn.style.background = 'var(--red)';
+                    cartBtn.style.color = '#fff';
+                    cartBtn.style.borderColor = 'var(--red)';
+                } else {
+                    cartBtn.classList.remove('active');
+                    cartBtn.style.background = '';
+                    cartBtn.style.color = '';
+                    cartBtn.style.borderColor = '';
+                }
+            }
+            
+            // Check if in wishlist
+            const inWishlist = wishlist.some(item => item.title === title);
+            if (wishlistBtn) {
+                const icon = wishlistBtn.querySelector('i');
+                if (inWishlist) {
+                    wishlistBtn.classList.add('active');
+                    wishlistBtn.style.background = 'var(--red)';
+                    wishlistBtn.style.color = '#fff';
+                    wishlistBtn.style.borderColor = 'var(--red)';
+                    if (icon) {
+                        icon.className = 'fas fa-heart';
+                    }
+                } else {
+                    wishlistBtn.classList.remove('active');
+                    wishlistBtn.style.background = '';
+                    wishlistBtn.style.color = '';
+                    wishlistBtn.style.borderColor = '';
+                    if (icon) {
+                        icon.className = 'far fa-heart';
+                    }
+                }
+            }
+        });
     }
 
     function showToast(msg, type='success') {
@@ -174,6 +307,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.moveWishlistToCart = function(index) {
         const item = wishlist[index];
+        if (cart.some(i => i.title === item.title)) {
+            showToast('Already in Cart!', 'info');
+            return;
+        }
         cart.push(item);
         wishlist.splice(index, 1);
         saveState();
@@ -181,16 +318,110 @@ document.addEventListener('DOMContentLoaded', () => {
         showToast('Moved to Cart!');
     }
 
+    function renderPageCart() {
+        const container = document.getElementById('page-cart-items');
+        const totalEl = document.getElementById('page-cart-total');
+        const summaryBox = document.getElementById('page-cart-summary');
+        const countEl = document.getElementById('page-cart-count');
+        
+        if (!container) return;
+
+        if (cart.length === 0) {
+            container.innerHTML = '<div class="empty-state" style="text-align: center; color: #888; padding: 40px 0; font-weight: 600;">Your cart is empty. Start shopping now!</div>';
+            if (totalEl) totalEl.innerText = '₹0';
+            if (summaryBox) summaryBox.style.display = 'none';
+            if (countEl) countEl.innerText = '0';
+            return;
+        }
+
+        let total = 0;
+        container.innerHTML = cart.map((item, index) => {
+            const price = parseFloat(item.price.replace(/[^0-9.]/g, '')) || 0;
+            total += price;
+            return `
+                <div class="page-cart-item" style="display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid #f1f5f9;">
+                    <img src="${item.img}" alt="${item.title}" style="width:50px; height:50px; object-fit:contain; border-radius:8px; border:1px solid #f1f5f9; padding:3px; background:#fff; flex-shrink:0;">
+                    <div style="flex:1; min-width:0;">
+                        <h4 style="font-size:0.85rem; font-weight:700; color:#1e293b; margin:0 0 2px 0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${item.title}">${item.title}</h4>
+                        <div style="font-size:0.95rem; font-weight:800; color:var(--red);">${item.price || 'Ask Price'}</div>
+                    </div>
+                    <div style="display:flex; gap:6px; align-items:center; flex-shrink:0;">
+                        <button class="btn-buy-single" onclick="quickBuyItem(${index})" style="background:var(--green); color:#fff; border:none; border-radius:6px; padding:6px 10px; font-size:0.75rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:3px; transition:0.2s;"><i class="fab fa-whatsapp"></i> Buy</button>
+                        <button onclick="removeFromCart(${index})" style="background:#f1f5f9; color:#64748b; border:none; border-radius:6px; width:30px; height:30px; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; transition:0.2s;"><i class="fas fa-trash" style="font-size:0.75rem;"></i></button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        if (totalEl) totalEl.innerText = `₹${total.toLocaleString('en-IN')}`;
+        if (summaryBox) summaryBox.style.display = 'block';
+        if (countEl) countEl.innerText = cart.length;
+    }
+
+    function renderPageWishlist() {
+        const container = document.getElementById('page-wishlist-items');
+        const countEl = document.getElementById('page-wishlist-count');
+        
+        if (!container) return;
+
+        if (wishlist.length === 0) {
+            container.innerHTML = '<div class="empty-state" style="text-align: center; color: #888; padding: 40px 0; font-weight: 600;">Your wishlist is empty.</div>';
+            if (countEl) countEl.innerText = '0';
+            return;
+        }
+
+        container.innerHTML = wishlist.map((item, index) => {
+            return `
+                <div class="page-wishlist-item" style="display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid #f1f5f9;">
+                    <img src="${item.img}" alt="${item.title}" style="width:50px; height:50px; object-fit:contain; border-radius:8px; border:1px solid #f1f5f9; padding:3px; background:#fff; flex-shrink:0;">
+                    <div style="flex:1; min-width:0;">
+                        <h4 style="font-size:0.85rem; font-weight:700; color:#1e293b; margin:0 0 2px 0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${item.title}">${item.title}</h4>
+                        <div style="font-size:0.95rem; font-weight:800; color:var(--red);">${item.price || 'Ask Price'}</div>
+                    </div>
+                    <div style="display:flex; gap:6px; align-items:center; flex-shrink:0;">
+                        <button onclick="moveWishlistToCart(${index})" style="background:var(--red-light); color:var(--red); border:none; border-radius:6px; padding:6px 10px; font-size:0.75rem; font-weight:700; cursor:pointer; transition:0.2s;">Add to Cart</button>
+                        <button onclick="removeFromWishlist(${index})" style="background:#f1f5f9; color:#64748b; border:none; border-radius:6px; width:30px; height:30px; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; transition:0.2s;"><i class="fas fa-trash" style="font-size:0.75rem;"></i></button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        if (countEl) countEl.innerText = wishlist.length;
+    }
+
+    window.quickBuyItem = function(index) {
+        const item = cart[index];
+        if (!item) return;
+        
+        const typeInput = document.getElementById('checkout-type');
+        const titleInput = document.getElementById('checkout-single-title');
+        const priceInput = document.getElementById('checkout-single-price');
+        
+        if (typeInput) typeInput.value = 'single';
+        if (titleInput) titleInput.value = item.title;
+        if (priceInput) priceInput.value = item.price;
+        
+        openModal('ecom-checkout-modal');
+    };
+
     // --- Event Listeners for Adding ---
 
-    // 1. Add to Cart (Best Sellers)
+    // 1. Add/Remove Cart (Best Sellers) — toggle on re-click
     document.querySelectorAll('.cart-btn-exact').forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
             const card = this.closest('.product-card-exact');
+            const title = card.querySelector('.product-title-exact').innerText;
+            const index = cart.findIndex(i => i.title === title);
+            if (index !== -1) {
+                cart.splice(index, 1);
+                saveState();
+                showToast('Removed from Cart!', 'info');
+                return;
+            }
             const item = {
-                title: card.querySelector('.product-title-exact').innerText,
+                title: title,
                 price: card.querySelector('.current').innerText,
                 img: card.querySelector('img').src
             };
@@ -201,14 +432,22 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     
-    // 1b. Add to Wishlist (Best Sellers)
+    // 1b. Add/Remove Wishlist (Best Sellers)
     document.querySelectorAll('.wishlist-btn-exact').forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
             const card = this.closest('.product-card-exact');
+            const title = card.querySelector('.product-title-exact').innerText;
+            const index = wishlist.findIndex(i => i.title === title);
+            if (index !== -1) {
+                wishlist.splice(index, 1);
+                saveState();
+                showToast('Removed from Wishlist!', 'info');
+                return;
+            }
             const item = {
-                title: card.querySelector('.product-title-exact').innerText,
+                title: title,
                 price: card.querySelector('.current').innerText,
                 img: card.querySelector('img').src
             };
@@ -218,11 +457,55 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // 2. Add to Cart (Quick View/WA Modal) -> We override WA modal to act as quick inquiry, but let's add a "Add to Cart" button to shelf items too
-    // Inject Add to Cart / Wishlist buttons on shelf items on hover
-    document.querySelectorAll('.shelf-item').forEach(item => {
-        // We will just capture clicks if they have explicit Add to Cart buttons.
-        // If not, we will rely on the WA modal for shelf items.
+    // 2. Add to Cart / Wishlist (Shelf Items) using event delegation
+    document.addEventListener('click', function(e) {
+        const cartBtn = e.target.closest('.shelf-cart-btn');
+        if (cartBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            const card = cartBtn.closest('.shelf-item');
+            if (card) {
+                const title = card.getAttribute('data-name') || card.querySelector('.item-name')?.innerText || '';
+                const index = cart.findIndex(i => i.title === title);
+                if (index !== -1) {
+                    cart.splice(index, 1);
+                    saveState();
+                    showToast('Removed from Cart!', 'info');
+                    return;
+                }
+                const priceEl = card.querySelector('.item-price');
+                const price = priceEl ? priceEl.innerText : 'Ask Price';
+                const img = card.querySelector('img')?.src || '';
+                cart.push({ title, price, img });
+                saveState();
+                showToast('Added to Cart!');
+            }
+            return;
+        }
+
+        const wishlistBtn = e.target.closest('.shelf-wishlist-btn');
+        if (wishlistBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            const card = wishlistBtn.closest('.shelf-item');
+            if (card) {
+                const title = card.getAttribute('data-name') || card.querySelector('.item-name')?.innerText || '';
+                const index = wishlist.findIndex(i => i.title === title);
+                if (index !== -1) {
+                    wishlist.splice(index, 1);
+                    saveState();
+                    showToast('Removed from Wishlist!', 'info');
+                    return;
+                }
+                const priceEl = card.querySelector('.item-price');
+                const price = priceEl ? priceEl.innerText : 'Ask Price';
+                const img = card.querySelector('img')?.src || '';
+                wishlist.push({ title, price, img });
+                saveState();
+                showToast('Added to Wishlist!', 'wishlist');
+            }
+            return;
+        }
     });
 
     // --- Modal Toggles ---
@@ -265,13 +548,123 @@ document.addEventListener('DOMContentLoaded', () => {
     // Checkout Logic
     document.getElementById('checkout-btn').addEventListener('click', () => {
         if (cart.length === 0) return alert('Your cart is empty!');
-        // Open WA Modal with checkout details
-        let details = cart.map(i => i.title).join(', ');
-        alert(`Proceeding to checkout with: ${details}. \nThis will redirect to the payment gateway.`);
-        cart = [];
-        saveState();
+        
+        // Close cart modal
         document.getElementById('cart-modal').classList.remove('active');
+        
+        // Setup checkout modal for ALL items
+        const typeInput = document.getElementById('checkout-type');
+        if (typeInput) typeInput.value = 'all';
+        
+        // Open checkout modal
+        openModal('ecom-checkout-modal');
     });
+
+    // Modal Confirm Checkout Button Action
+    const modalConfirmCheckoutBtn = document.getElementById('modal-confirm-checkout-btn');
+    if (modalConfirmCheckoutBtn) {
+        modalConfirmCheckoutBtn.addEventListener('click', () => {
+            const name = document.getElementById('modal-checkout-name').value.trim();
+            const phone = document.getElementById('modal-checkout-phone').value.trim();
+            const address = document.getElementById('modal-checkout-address').value.trim();
+            
+            if (!name || !phone || !address) {
+                alert('Please fill in all delivery details.');
+                return;
+            }
+            
+            const type = document.getElementById('checkout-type').value;
+            let waText = '';
+            
+            if (type === 'single') {
+                const title = document.getElementById('checkout-single-title').value;
+                const price = document.getElementById('checkout-single-price').value;
+                
+                waText = `*NEW ORDER FROM PEEKEY WEBSITE*\n\n` +
+                         `*Customer Details:*\n` +
+                         `Name: ${name}\n` +
+                         `Phone: ${phone}\n` +
+                         `Address: ${address}\n\n` +
+                         `*Item Ordered:*\n1. *${title}* - ${price}\n\n` +
+                         `*Total Amount:* ${price}\n\n` +
+                         `Please confirm my order. Thank you!`;
+            } else {
+                let itemsText = cart.map((item, idx) => `${idx + 1}. *${item.title}* - ${item.price}`).join('\n');
+                let total = 0;
+                cart.forEach(item => {
+                    total += parseFloat(item.price.replace(/[^0-9.]/g, '')) || 0;
+                });
+                
+                waText = `*NEW ORDER FROM PEEKEY WEBSITE*\n\n` +
+                         `*Customer Details:*\n` +
+                         `Name: ${name}\n` +
+                         `Phone: ${phone}\n` +
+                         `Address: ${address}\n\n` +
+                         `*Items Ordered:*\n${itemsText}\n\n` +
+                         `*Total Amount:* ₹${total.toLocaleString('en-IN')}\n\n` +
+                         `Please confirm my order. Thank you!`;
+                
+                // Clear cart
+                cart = [];
+                saveState();
+            }
+            
+            const waNumber = '919495988211';
+            const waUrl = 'https://wa.me/' + waNumber + '?text=' + encodeURIComponent(waText);
+            window.open(waUrl, '_blank');
+            
+            // Clear inputs
+            document.getElementById('modal-checkout-name').value = '';
+            document.getElementById('modal-checkout-phone').value = '';
+            document.getElementById('modal-checkout-address').value = '';
+            
+            // Close modal
+            document.getElementById('ecom-checkout-modal').classList.remove('active');
+        });
+    }
+
+    // Page Cart Section Checkout Button Action
+    const pageCheckoutBtn = document.getElementById('page-checkout-btn');
+    if (pageCheckoutBtn) {
+        pageCheckoutBtn.addEventListener('click', () => {
+            const name = document.getElementById('checkout-name').value.trim();
+            const phone = document.getElementById('checkout-phone').value.trim();
+            const address = document.getElementById('checkout-address').value.trim();
+            
+            if (!name || !phone || !address) {
+                alert('Please fill in your Name, Phone, and Delivery Address.');
+                return;
+            }
+            
+            let itemsText = cart.map((item, idx) => `${idx + 1}. *${item.title}* - ${item.price}`).join('\n');
+            let total = 0;
+            cart.forEach(item => {
+                total += parseFloat(item.price.replace(/[^0-9.]/g, '')) || 0;
+            });
+            
+            const waText = `*NEW ORDER FROM PEEKEY WEBSITE*\n\n` +
+                           `*Customer Details:*\n` +
+                           `Name: ${name}\n` +
+                           `Phone: ${phone}\n` +
+                           `Address: ${address}\n\n` +
+                           `*Items Ordered:*\n${itemsText}\n\n` +
+                           `*Total Amount:* ₹${total.toLocaleString('en-IN')}\n\n` +
+                           `Please confirm my order. Thank you!`;
+            
+            const waNumber = '919495988211';
+            const waUrl = 'https://wa.me/' + waNumber + '?text=' + encodeURIComponent(waText);
+            window.open(waUrl, '_blank');
+            
+            // Clear cart
+            cart = [];
+            saveState();
+            
+            // Clear form
+            document.getElementById('checkout-name').value = '';
+            document.getElementById('checkout-phone').value = '';
+            document.getElementById('checkout-address').value = '';
+        });
+    }
 
 
     // --- 4. Interactive Search Bar Functionality ---
@@ -492,6 +885,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     updateBadges();
+    renderCart();
+    renderWishlist();
+    renderPageCart();
+    renderPageWishlist();
+    updateProductCardStatus();
 });
 
     // --- Right Sidebar Logic ---

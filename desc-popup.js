@@ -313,10 +313,11 @@
     }
   });
 
-  /* ───────────────────────────── EVENT DELEGATION ─────────────── */
+  /* ───────────────────────────── EVENT DELEGATION ───────────────── */
   // ── Desktop click (capture phase) — fires before any onclick on parent ──
   document.addEventListener('click', function(e) {
     if (e.target.tagName !== 'IMG') return;
+    if (e.target.closest('.cat-card-exact')) return; // Ignore category cards here
     const info = getInfo(e.target);
     if (!info) return;                       // not a product image – ignore
     e.stopPropagation();
@@ -330,6 +331,7 @@
   document.addEventListener('touchstart', function(e) {
     const img = e.target.tagName === 'IMG' ? e.target : null;
     if (!img) return;
+    if (img.closest('.cat-card-exact')) return; // Ignore category cards here
     const info = getInfo(img);
     if (!info) return;
 
@@ -357,6 +359,122 @@
   document.addEventListener('touchmove',   () => { touchMoved = true; clearTimeout(touchTimer); if (touchRing) touchRing.classList.remove('active'); });
   document.addEventListener('touchend',    () => { clearTimeout(touchTimer); if (touchRing) touchRing.classList.remove('active'); });
   document.addEventListener('touchcancel', () => { clearTimeout(touchTimer); if (touchRing) touchRing.classList.remove('active'); });
+
+  /* ───────────────────────────── SHOP BY CATEGORY HANDLERS ────── */
+  function getCatCardInfo(catCard) {
+    const img = catCard.querySelector('img');
+    const name = catCard.querySelector('h3')?.textContent?.replace(/\s+/g,' ').trim() || img?.alt || '';
+    const src  = img ? img.src : '';
+    return { name, src, descImg: getDescUrl(name, src) };
+  }
+
+  let catTimer = null;
+  let activeCatCard = null;
+  let catLongPressed = false;
+
+  function startCatHold(card, isTouch) {
+    activeCatCard = card;
+    catLongPressed = false;
+    
+    card.style.position = 'relative';
+    if (!card.querySelector('.pk-press-ring')) {
+      card.insertAdjacentHTML('beforeend',
+        '<div class="pk-press-ring" style="z-index: 50;"><svg viewBox="0 0 56 56"><circle cx="28" cy="28" r="26"/></svg></div>');
+    }
+    const ring = card.querySelector('.pk-press-ring');
+    if (ring) ring.classList.add('active');
+
+    catTimer = setTimeout(() => {
+      catLongPressed = true;
+      card.dataset.longPressed = 'true';
+      
+      const info = getCatCardInfo(card);
+      openPopup(info.src, info.name, info.descImg);
+      
+      if (ring) ring.classList.remove('active');
+      clearCatHold();
+    }, 1000);
+  }
+
+  function clearCatHold() {
+    if (catTimer) {
+      clearTimeout(catTimer);
+      catTimer = null;
+    }
+    if (activeCatCard) {
+      const ring = activeCatCard.querySelector('.pk-press-ring');
+      if (ring) ring.classList.remove('active');
+    }
+    activeCatCard = null;
+  }
+
+  // Mouse hold events for category cards
+  document.addEventListener('mousedown', function(e) {
+    const card = e.target.closest('.cat-card-exact');
+    if (card && e.button === 0) { // left click only
+      startCatHold(card, false);
+    }
+  });
+
+  document.addEventListener('mouseup', function(e) {
+    if (activeCatCard) {
+      clearCatHold();
+    }
+  });
+
+  document.addEventListener('mouseleave', function(e) {
+    if (activeCatCard && e.target === activeCatCard) {
+      clearCatHold();
+    }
+  }, true);
+
+  document.addEventListener('mousemove', function(e) {
+    if (activeCatCard) {
+      if (!e.target.closest('.cat-card-exact') || e.target.closest('.cat-card-exact') !== activeCatCard) {
+        clearCatHold();
+      }
+    }
+  });
+
+  // Touch hold events for category cards
+  document.addEventListener('touchstart', function(e) {
+    const card = e.target.closest('.cat-card-exact');
+    if (card) {
+      startCatHold(card, true);
+    }
+  }, { passive: true });
+
+  document.addEventListener('touchend', function(e) {
+    if (activeCatCard) {
+      clearCatHold();
+    }
+  });
+
+  document.addEventListener('touchmove', function(e) {
+    if (activeCatCard) {
+      clearCatHold();
+    }
+  });
+
+  document.addEventListener('touchcancel', function(e) {
+    if (activeCatCard) {
+      clearCatHold();
+    }
+  });
+
+  // Prevent category card click navigation, show toast
+  document.addEventListener('click', function(e) {
+    const catCard = e.target.closest('.cat-card-exact');
+    if (catCard) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (catCard.dataset.longPressed === 'true') {
+        delete catCard.dataset.longPressed;
+      } else {
+        showToast('Available soon');
+      }
+    }
+  }, true);
 
   /* ───────────────────────────── UTILS ───────────────────────── */
   function toBase64(file) {
