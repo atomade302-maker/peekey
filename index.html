@@ -12,7 +12,7 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="style.css?v=1007">
+    <link rel="stylesheet" href="style.css?v=1008">
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -256,6 +256,16 @@
             <li><a href="#brands" class="sidebar-link"><i class="fas fa-tags"></i> Brands</a></li>
             <li><a href="#offers" class="sidebar-link"><i class="fas fa-percent"></i> Offers</a></li>
             <li><a href="#contact" class="sidebar-link"><i class="fas fa-phone-alt"></i> Contact Us</a></li>
+            <li>
+                <a href="#" class="sidebar-link" onclick="event.preventDefault(); document.getElementById('closeSidebarBtn').click(); openTrackOrder();">
+                    <i class="fas fa-truck"></i> Track Order
+                </a>
+            </li>
+            <li id="sidebarUserLi">
+                <a href="#" class="sidebar-link" onclick="event.preventDefault(); document.getElementById('closeSidebarBtn').click(); openSignIn();">
+                    <i class="fas fa-user-circle"></i> <span id="sidebarUserText">Sign In</span>
+                </a>
+            </li>
         </ul>
 
         <!-- Sidebar Cart & Wishlist Section -->
@@ -326,6 +336,8 @@
                         <li data-value="Crockery & Dining">Crockery & Dining</li>
                         <li data-value="Pooja & Devotional">Pooja & Devotional</li>
                         <li data-value="Home Essentials">Home Essentials</li>
+                        <li data-value="Electrical & Lighting">Electrical & Lighting</li>
+                        <li data-value="Gas Stoves & Hobs">Gas Stoves & Hobs</li>
                     </ul>
                 </div>
                 <input type="text" placeholder="Search for products, brands and more...">
@@ -795,6 +807,24 @@
 
     <section class="inventory-section section-padding" style="background:#fafafa;">
         <div class="container">
+            <div class="section-title-new"><div class="line"></div><h2>ELECTRICAL &amp; LIGHTING</h2><div class="line"></div></div>
+            <div class="shelf-container"></div>
+        </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <section class="inventory-section section-padding">
+        <div class="container">
+            <div class="section-title-new"><div class="line"></div><h2>GAS STOVES &amp; HOBS</h2><div class="line"></div></div>
+            <div class="shelf-container"></div>
+        </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <section class="inventory-section section-padding" style="background:#fafafa;">
+        <div class="container">
             <div class="section-title-new"><div class="line"></div><h2>TOP BRANDS WE FEATURE</h2><div class="line"></div></div>
             <div class="brands-grid-inventory">
                 <div class="brand-tag-inventory">Prestige</div><div class="brand-tag-inventory">Preethi</div>
@@ -918,7 +948,7 @@
     // Load admin-uploaded cloud products into the correct shelf sections
     (function(){
       const SK = 'peekey_products_v2';
-      const CAT_ORDER = ['Home Appliances','Kitchenware','Crockery & Dining','Pooja & Devotional','Home Essentials'];
+      const CAT_ORDER = ['Home Appliances','Kitchenware','Crockery & Dining','Pooja & Devotional','Home Essentials','Electrical & Lighting','Gas Stoves & Hobs'];
       const ADMIN_EMAIL = 'peekeymetalsulikkal@gmail.com';
 
       const DEFAULT_PRODUCTS = [
@@ -1636,6 +1666,7 @@
 /* Floating Admin Button */
 #adminFloatBtn{position:fixed;bottom:24px;left:24px;z-index:9999;background:#ad1f35;color:#fff;border:none;border-radius:50px;padding:10px 18px;font-family:'Outfit',sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px;box-shadow:0 4px 20px rgba(173,31,53,.4);transition:.2s}
 #adminFloatBtn:hover{background:#c0392b;transform:translateY(-2px)}
+@media(max-width:768px){#adminFloatBtn{display:none!important;}}
 .ap-api-box{background:#0c0e14;border:1px solid #2a2f42;border-radius:10px;padding:16px;margin-bottom:18px}
 .ap-api-box label{display:block;font-size:.75rem;color:#7a8099;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px}
 .ap-api-row{display:flex;gap:10px;align-items:center}
@@ -1649,7 +1680,7 @@
 </style>
 
 <!-- Floating Admin Button (hidden until admin logs in) -->
-<button id="adminFloatBtn" onclick="openAdmin()" style="display:none"><i class="fas fa-lock"></i> Admin Panel</button>
+<button id="adminFloatBtn" onclick="openAdmin()" style="display:none !important"><i class="fas fa-lock"></i> Admin Panel</button>
 
 <!-- Sign In Modal -->
 <style>
@@ -1731,14 +1762,11 @@
     <div class="ap-body">
 
       <!-- LOGIN -->
-      <div id="apLogin">
-        <span class="lock-icon">🔐</span>
-        <h3>Admin Access Required</h3>
-        <p>This panel is for authorized use only.</p>
-        <input type="password" id="apPassInput" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')apDoLogin()">
-        <br>
-        <button id="apLoginBtn" onclick="apDoLogin()"><i class="fas fa-unlock"></i> Login</button>
-        <p id="apLoginError">❌ Wrong password. Try again.</p>
+      <div id="apLogin" style="text-align: center; padding: 40px 20px;">
+        <span class="lock-icon" style="font-size: 3rem; display: block; margin-bottom: 15px;">🛡️</span>
+        <h3 style="font-size: 1.4rem; color: #fff; margin-bottom: 10px;">Admin Access Required</h3>
+        <p style="color: #a0aec0; margin-bottom: 25px; max-width: 320px; margin-left: auto; margin-right: auto; line-height: 1.5;">This panel is only accessible to the store administrator. Please sign in with the authorized admin Google Account.</p>
+        <button id="apLoginBtn" onclick="closeAdmin(); openSignIn();" style="padding: 12px 24px; background: #ad1f35; color: #fff; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 0.95rem; transition: 0.2s;"><i class="fab fa-google"></i> Sign In as Admin</button>
       </div>
 
       <!-- DASHBOARD -->
@@ -1758,7 +1786,8 @@
           <div class="ap-form-row" style="grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 14px;">
             <div class="ap-fg">
               <label>Product Name</label>
-              <input type="text" id="apProdName" placeholder="e.g. Pressure Cooker 5L">
+              <input type="text" id="apProdName" placeholder="e.g. Pressure Cooker 5L" oninput="apAutoDetectCat(this.value)">
+              <div class="ap-auto-detect" id="apAutoDetect" style="font-size:0.75rem; color:#f59e0b; margin-top:5px; display:none;"><i class="fas fa-magic"></i> Auto-detected category</div>
             </div>
             <div class="ap-fg">
               <label>MRP / Price (₹)</label>
@@ -1772,6 +1801,8 @@
                 <option value="Crockery & Dining">Crockery &amp; Dining</option>
                 <option value="Pooja & Devotional">Pooja &amp; Devotional</option>
                 <option value="Home Essentials">Home Essentials</option>
+                <option value="Electrical & Lighting">Electrical &amp; Lighting</option>
+                <option value="Gas Stoves & Hobs">Gas Stoves &amp; Hobs</option>
               </select>
             </div>
           </div>
@@ -1875,6 +1906,8 @@
         <option value="Crockery & Dining">Crockery &amp; Dining</option>
         <option value="Pooja & Devotional">Pooja &amp; Devotional</option>
         <option value="Home Essentials">Home Essentials</option>
+        <option value="Electrical & Lighting">Electrical &amp; Lighting</option>
+        <option value="Gas Stoves & Hobs">Gas Stoves &amp; Hobs</option>
       </select>
     </div>
     <div style="display:flex;gap:8px;">
@@ -1954,16 +1987,60 @@ function doGoogleSignIn(){
     });
 }
 
+function openTrackOrder() {
+  const desktopTrack = Array.from(document.querySelectorAll('.ts-action-item')).find(el => el.innerText.toLowerCase().includes('track order'));
+  if (desktopTrack) {
+    desktopTrack.click();
+  } else {
+    const trackModal = document.getElementById('track-order-modal');
+    if (trackModal) trackModal.classList.add('active');
+  }
+}
+
+function handleMobUserClick() {
+  const email = sessionStorage.getItem('pk_user_email');
+  if (email === ADMIN_EMAIL) {
+    openAdmin();
+  } else {
+    openSignIn();
+  }
+}
+
+function updateMobUserTab() {
+  const email = sessionStorage.getItem('pk_user_email');
+  const textEl = document.getElementById('mobUserText');
+  const iconEl = document.getElementById('mobUserIcon');
+  const tabEl = document.getElementById('mobUserTab');
+  if (!textEl || !iconEl) return;
+
+  if (email === ADMIN_EMAIL) {
+    textEl.textContent = 'Admin';
+    iconEl.className = 'fas fa-shield-alt';
+    if (tabEl) tabEl.style.setProperty('color', '#ad1f35', 'important');
+  } else if (email) {
+    textEl.textContent = 'Profile';
+    iconEl.className = 'fas fa-circle-user';
+    if (tabEl) tabEl.style.setProperty('color', '', '');
+  } else {
+    textEl.textContent = 'Sign In';
+    iconEl.className = 'far fa-user';
+    if (tabEl) tabEl.style.setProperty('color', '', '');
+  }
+}
+
 function doSignOut(){
   sessionStorage.removeItem('pk_user_email');
   sessionStorage.removeItem('pk_user_name');
   sessionStorage.removeItem('pk_user_photo');
   sessionStorage.removeItem('pk_admin');
   closeSignIn();
-  // Hide admin button, show sign in
-  document.getElementById('adminFloatBtn').style.display='none';
+  // Hide admin buttons
+  document.getElementById('adminFloatBtn').style.setProperty('display', 'none', 'important');
   document.getElementById('signinBtn').style.display='flex';
   document.getElementById('userBtn').style.display='none';
+  const sidebarUserText = document.getElementById('sidebarUserText');
+  if(sidebarUserText) sidebarUserText.textContent = 'Sign In';
+  updateMobUserTab();
   location.reload();
 }
 
@@ -1986,13 +2063,20 @@ function updateNavUser(email, name, photo){
     ? `<img src="${photo}" style="width:32px;height:32px;border-radius:50%;object-fit:cover">`
     : email[0].toUpperCase();
   document.getElementById('userNameLabel').textContent = name || email.split('@')[0];
+  const sidebarUserText = document.getElementById('sidebarUserText');
+  if(sidebarUserText) sidebarUserText.textContent = name || email.split('@')[0];
+  updateMobUserTab();
 }
 
 function checkAdminAccess(email){
   if(email === ADMIN_EMAIL){
     sessionStorage.setItem('pk_admin','1');
-    document.getElementById('adminFloatBtn').style.display='flex';
+    document.getElementById('adminFloatBtn').style.setProperty('display', 'flex', 'important');
+  } else {
+    sessionStorage.removeItem('pk_admin');
+    document.getElementById('adminFloatBtn').style.setProperty('display', 'none', 'important');
   }
+  updateMobUserTab();
 }
 
 // Restore session on page load
@@ -2001,6 +2085,7 @@ function checkAdminAccess(email){
   const name  = sessionStorage.getItem('pk_user_name');
   const photo = sessionStorage.getItem('pk_user_photo');
   if(email){ updateNavUser(email, name, photo); checkAdminAccess(email); }
+  else { updateMobUserTab(); }
 })();
 
 // Close on outside click
@@ -2027,17 +2112,56 @@ document.getElementById('signInOverlay').addEventListener('click', e=>{ if(e.tar
     if(e.ctrlKey && e.shiftKey && e.key==='A'){e.preventDefault();openAdmin();}
   });
 
-  // ── Auth ──────────────────────────────────────────────────
-  window.apDoLogin = function(){
-    if(document.getElementById('apPassInput').value === PASS){
-      sessionStorage.setItem('pk_admin','1');
-      document.getElementById('apLoginError').style.display='none';
-      showApDash();
+  // ── Auto-Detect Category ──────────────────────────────────
+  const AP_CAT_KEYWORDS = {
+    'Home Appliances': ['mixer','grinder','juicer','rice cooker','air fryer','toaster','sandwich','water heater','exhaust fan','purifier','iron','blender','oven','microwave','induction','cooktop','fan','heater'],
+    'Kitchenware': ['cooker','pressure','pan','tawa','wok','kadai','pot','cookware','saucepan','stockpot','milk boiler','appam','dosa','cast iron','triply','non-stick','knife','knives','chopping','board','grater','mortar','pestle','spoon','spatula','ladle','brass utensil','brass bottle'],
+    'Crockery & Dining': ['plate','bowl','mug','cup','glass','jug','tray','cutlery','fork','spoon set','dessert','cake stand','serving','dinner set','ceramic','porcelain'],
+    'Pooja & Devotional': ['vilakku','nilavilakku','lamp','pooja','thali','kalash','panchapathram','bell','incense','diya','agarbatti','brass bell'],
+    'Home Essentials': ['bucket','bottle','flask','lunch box','storage','jar','container','chair','rack','shelf','dustbin','laundry','basket','shoe rack','cleaning','brush','mop','broom','water bottle','steel bottle','vacuum'],
+    'Electrical & Lighting': ['bulb','led','tube','switch','wire','plug','socket','holder','extension','torch','lamp','battery','cables','adapter','light'],
+    'Gas Stoves & Hobs': ['stove','gas','hob','burner','regulator','pipe','lighter']
+  };
+
+  window.apAutoDetectCat = function(name) {
+    const val = name.toLowerCase().trim();
+    const badge = document.getElementById('apAutoDetect');
+    const select = document.getElementById('apProdCat');
+    if (!val) {
+      badge.style.display = 'none';
+      return;
+    }
+    let detected = null;
+    for (const [cat, kws] of Object.entries(AP_CAT_KEYWORDS)) {
+      if (kws.some(kw => val.includes(kw))) {
+        detected = cat;
+        break;
+      }
+    }
+    if (detected) {
+      select.value = detected;
+      badge.style.display = 'block';
     } else {
-      document.getElementById('apLoginError').style.display='block';
+      badge.style.display = 'none';
     }
   };
-  window.apLogout = function(){sessionStorage.removeItem('pk_admin');closeAdmin();};
+
+  // ── Auth ──────────────────────────────────────────────────
+  window.apDoLogin = function(){
+    const email = sessionStorage.getItem('pk_user_email');
+    if (email === ADMIN_EMAIL) {
+      sessionStorage.setItem('pk_admin','1');
+      showApDash();
+    } else {
+      closeAdmin();
+      openSignIn();
+    }
+  };
+  window.apLogout = function(){
+    sessionStorage.removeItem('pk_admin');
+    doSignOut();
+    closeAdmin();
+  };
 
   function showApDash(){
     document.getElementById('apLogin').style.display='none';
@@ -2224,6 +2348,8 @@ document.getElementById('signInOverlay').addEventListener('click', e=>{ if(e.tar
             <option value="Crockery & Dining" ${p.category==='Crockery & Dining'?'selected':''}>Crockery & Dining</option>
             <option value="Pooja & Devotional" ${p.category==='Pooja & Devotional'?'selected':''}>Pooja & Devotional</option>
             <option value="Home Essentials" ${p.category==='Home Essentials'?'selected':''}>Home Essentials</option>
+            <option value="Electrical & Lighting" ${p.category==='Electrical & Lighting'?'selected':''}>Electrical & Lighting</option>
+            <option value="Gas Stoves & Hobs" ${p.category==='Gas Stoves & Hobs'?'selected':''}>Gas Stoves & Hobs</option>
           </select>
           
           <button class="ap-btn-del" onclick="apDelete(${i})" style="width:100%;padding:6px;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.25);border-radius:6px;color:#ef4444;font-size:0.7rem;cursor:pointer;transition:0.2s;"><i class="fas fa-trash"></i> Remove</button>
@@ -2439,7 +2565,7 @@ document.getElementById('signInOverlay').addEventListener('click', e=>{ if(e.tar
 </script>
 
 <!-- Mobile Bottom Navigation Bar -->
-<div class="mobile-bottom-nav">
+<div class="mobile-bottom-nav" id="mobileBottomNav">
     <a href="index.html" class="mob-nav-item active">
         <i class="fas fa-home"></i>
         <span>Home</span>
@@ -2462,9 +2588,10 @@ document.getElementById('signInOverlay').addEventListener('click', e=>{ if(e.tar
         </div>
         <span>Cart</span>
     </a>
-    <a href="#" class="mob-nav-item mob-track-btn">
-        <i class="fas fa-truck"></i>
-        <span>Track</span>
+    <!-- Dynamic User/Admin Tab -->
+    <a href="#" class="mob-nav-item" id="mobUserTab" onclick="event.preventDefault(); handleMobUserClick();">
+        <i class="far fa-user" id="mobUserIcon"></i>
+        <span id="mobUserText">Sign In</span>
     </a>
 </div>
 

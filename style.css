@@ -2235,6 +2235,27 @@ section, [id], .inv-anchor {
         display: block !important;
         object-fit: contain !important;
     }
+
+    /* Mobile Admin Nav Button — visible only after admin login */
+    .mob-admin-btn {
+        color: #ad1f35 !important;
+        position: relative !important;
+    }
+    .mob-admin-btn i {
+        color: #ad1f35 !important;
+    }
+    .mob-admin-btn::before {
+        content: '' !important;
+        position: absolute !important;
+        top: 6px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        width: 36px !important;
+        height: 36px !important;
+        background: rgba(173, 31, 53, 0.10) !important;
+        border-radius: 10px !important;
+    }
+
 }
 
 /* Category Cards Overlap Fix & Spacing */

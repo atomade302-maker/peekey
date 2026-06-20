@@ -228,6 +228,8 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
             <option value="Crockery & Dining">🍽️ Crockery &amp; Dining</option>
             <option value="Pooja & Devotional">🪔 Pooja &amp; Devotional</option>
             <option value="Home Essentials">🏠 Home Essentials</option>
+            <option value="Electrical & Lighting">💡 Electrical &amp; Lighting</option>
+            <option value="Gas Stoves & Hobs">🔥 Gas Stoves &amp; Hobs</option>
           </select>
         </div>
       </div>
@@ -289,7 +291,9 @@ const CAT_KEYWORDS = {
   'Kitchenware': ['cooker','pressure','pan','tawa','wok','kadai','pot','cookware','saucepan','stockpot','milk boiler','appam','dosa','cast iron','triply','non-stick','knife','knives','chopping','board','grater','mortar','pestle','spoon','spatula','ladle','brass utensil','brass bottle'],
   'Crockery & Dining': ['plate','bowl','mug','cup','glass','jug','tray','cutlery','fork','spoon set','dessert','cake stand','serving','dinner set','ceramic','porcelain'],
   'Pooja & Devotional': ['vilakku','nilavilakku','lamp','pooja','thali','kalash','panchapathram','bell','incense','diya','agarbatti','brass bell'],
-  'Home Essentials': ['bucket','bottle','flask','lunch box','storage','jar','container','chair','rack','shelf','dustbin','laundry','basket','shoe rack','cleaning','brush','mop','broom','water bottle','steel bottle','vacuum']
+  'Home Essentials': ['bucket','bottle','flask','lunch box','storage','jar','container','chair','rack','shelf','dustbin','laundry','basket','shoe rack','cleaning','brush','mop','broom','water bottle','steel bottle','vacuum'],
+  'Electrical & Lighting': ['bulb','led','tube','switch','wire','plug','socket','holder','extension','torch','lamp','battery','cables','adapter','light'],
+  'Gas Stoves & Hobs': ['stove','gas','hob','burner','regulator','pipe','lighter']
 };
 
 function detectCategory(name) {
@@ -584,6 +588,8 @@ function renderGrid(filter) {
             <option value="Crockery & Dining" ${p.category==='Crockery & Dining'?'selected':''}>🍽️ Crockery & Dining</option>
             <option value="Pooja & Devotional" ${p.category==='Pooja & Devotional'?'selected':''}>🪔 Pooja & Devotional</option>
             <option value="Home Essentials" ${p.category==='Home Essentials'?'selected':''}>🏠 Home Essentials</option>
+            <option value="Electrical & Lighting" ${p.category==='Electrical & Lighting'?'selected':''}>💡 Electrical & Lighting</option>
+            <option value="Gas Stoves & Hobs" ${p.category==='Gas Stoves & Hobs'?'selected':''}>🔥 Gas Stoves & Hobs</option>
           </select>
         </div>
         <button class="pdel" onclick="delProduct(${ri})" style="width:100%;margin-top:4px;"><i class="fas fa-trash"></i> Remove</button>
