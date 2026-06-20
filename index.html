@@ -762,8 +762,8 @@
 
     <section class="inventory-section section-padding">
         <div class="container">
-            <div class="section-title-new"><div class="line"></div><h2>HOME APPLIANCES</h2><div class="line"></div></div>
-            <div class="shelf-container"></div>
+            <div class="section-title-new"><div class="line"></div><h2>🍳 KITCHEN &amp; DINING</h2><div class="line"></div></div>
+            <div class="shelf-container" id="shelf-kitchen"></div>
         </div>
     </section>
 
@@ -771,8 +771,8 @@
 
     <section class="inventory-section section-padding" style="background:#fafafa;">
         <div class="container">
-            <div class="section-title-new"><div class="line"></div><h2>KITCHENWARE</h2><div class="line"></div></div>
-            <div class="shelf-container"></div>
+            <div class="section-title-new"><div class="line"></div><h2>🔌 ELECTRICALS &amp; LIGHTING</h2><div class="line"></div></div>
+            <div class="shelf-container" id="shelf-electrical"></div>
         </div>
     </section>
 
@@ -780,44 +780,8 @@
 
     <section class="inventory-section section-padding">
         <div class="container">
-            <div class="section-title-new"><div class="line"></div><h2>CROCKERY &amp; DINING</h2><div class="line"></div></div>
-            <div class="shelf-container"></div>
-        </div>
-    </section>
-
-    <div class="section-divider"></div>
-
-    <section class="inventory-section section-padding" style="background:#fafafa;">
-        <div class="container">
-            <div class="section-title-new"><div class="line"></div><h2>POOJA &amp; DEVOTIONAL ITEMS</h2><div class="line"></div></div>
-            <div class="shelf-container"></div>
-        </div>
-    </section>
-
-    <div class="section-divider"></div>
-
-    <section class="inventory-section section-padding">
-        <div class="container">
-            <div class="section-title-new"><div class="line"></div><h2>HOME ESSENTIALS</h2><div class="line"></div></div>
-            <div class="shelf-container"></div>
-        </div>
-    </section>
-
-    <div class="section-divider"></div>
-
-    <section class="inventory-section section-padding" style="background:#fafafa;">
-        <div class="container">
-            <div class="section-title-new"><div class="line"></div><h2>ELECTRICAL &amp; LIGHTING</h2><div class="line"></div></div>
-            <div class="shelf-container"></div>
-        </div>
-    </section>
-
-    <div class="section-divider"></div>
-
-    <section class="inventory-section section-padding">
-        <div class="container">
-            <div class="section-title-new"><div class="line"></div><h2>GAS STOVES &amp; HOBS</h2><div class="line"></div></div>
-            <div class="shelf-container"></div>
+            <div class="section-title-new"><div class="line"></div><h2>🪔 HOME &amp; DEVOTIONAL ESSENTIALS</h2><div class="line"></div></div>
+            <div class="shelf-container" id="shelf-home"></div>
         </div>
     </section>
 
@@ -1159,38 +1123,7 @@
         });
 
         // 2. Best Sellers card click — image clicks handled by desc-popup.js capture listener
-        document.querySelectorAll('.product-card-exact').forEach(card => {
-          card.onclick = null;
-          card.addEventListener('click', function(e) {
-            if (e.target.closest('.wishlist-btn-exact, .cart-btn-exact')) return;
-
-            const titleEl = card.querySelector('.product-title-exact');
-            if (!titleEl) return;
-            const productName  = titleEl.innerText.trim();
-            const imgEl        = card.querySelector('.product-img-box img');
-            const productImgUrl = imgEl ? imgEl.getAttribute('src') : '';
-
-            const _isAdmin = sessionStorage.getItem('pk_user_email') === ADMIN_EMAIL;
-            if (_isAdmin) {
-              let products = JSON.parse(localStorage.getItem(SK) || '[]');
-              let idx = products.findIndex(p => p.name &&
-                p.name.toLowerCase().trim() === productName.toLowerCase().trim());
-              if (idx === -1) {
-                products.push({ id:'static-'+Date.now(), name:productName,
-                  category: card.getAttribute('data-category')||'Home Appliances',
-                  url: productImgUrl,
-                  price: card.querySelector('.current')?.innerText.replace('₹','').replace(/,/g,'').trim()||'',
-                  at: Date.now() });
-                localStorage.setItem(SK, JSON.stringify(products));
-                idx = products.length - 1;
-                window.dispatchEvent(new CustomEvent('pk_products_updated'));
-              }
-              openQuickEdit(idx);
-            } else {
-              if (window.openWaModal) window.openWaModal(productName, productImgUrl);
-            }
-          });
-        });
+        // 2. Best Sellers card click — Handled by desc-popup.js Detail Modal.
 
         // 3. Category cards inline edit/replace buttons (.cat-card-exact)
         document.querySelectorAll('.cat-card-exact').forEach(card => {
@@ -1317,10 +1250,26 @@
           document.body.classList.remove('admin-mode-active');
         }
 
-        const shelves = document.querySelectorAll('.shelf-container');
         products.forEach((p, idx) => {
-          const catIdx = CAT_ORDER.indexOf(p.category);
-          const shelf = shelves[catIdx >= 0 ? catIdx : 0];
+          let shelfId = 'shelf-home';
+          const cat = p.category;
+          const name = (p.name || '').toLowerCase();
+          
+          if (cat === 'Electrical & Lighting') {
+            shelfId = 'shelf-electrical';
+          } else if (cat === 'Kitchenware' || cat === 'Crockery & Dining' || cat === 'Gas Stoves & Hobs') {
+            shelfId = 'shelf-kitchen';
+          } else if (cat === 'Home Appliances') {
+            const kitchenKeywords = ['mixer', 'grinder', 'juicer', 'cooker', 'fryer', 'toaster', 'sandwich', 'induction', 'kettle', 'stove', 'oven', 'pan', 'tawa', 'pot', 'boiler', 'bottle', 'flask', 'mug', 'cup', 'plate', 'bowl', 'spoon', 'fork', 'knife', 'cutlery'];
+            const isKitchen = kitchenKeywords.some(keyword => name.includes(keyword));
+            if (isKitchen) {
+              shelfId = 'shelf-kitchen';
+            } else {
+              shelfId = 'shelf-electrical';
+            }
+          }
+          
+          const shelf = document.getElementById(shelfId);
           if(!shelf) return;
           const el = document.createElement('div');
           el.className = 'shelf-item pk-cloud-item';
@@ -1328,24 +1277,7 @@
           el.setAttribute('data-category', p.category);
           el.setAttribute('data-name', p.name);
           
-          // Click on card (not image) → admin Quick Edit or user WA modal
-          // Image clicks are intercepted by desc-popup.js before reaching here
-          el.onclick = function(e) {
-            if (e.target.closest('.shelf-actions')) {
-              return;
-            }
-            if(sessionStorage.getItem('pk_user_email') === ADMIN_EMAIL) {
-              e.preventDefault();
-              openQuickEdit(idx);
-            } else {
-              if (window.openWaModal) {
-                e.preventDefault();
-                const name = this.querySelector('.item-name')?.innerText || '';
-                const img  = this.querySelector('img')?.src || '';
-                window.openWaModal(name, img);
-              }
-            }
-          };
+          // Card clicks are handled by desc-popup.js Detail Modal.
 
           el.innerHTML = `
             <div class="item-image-placeholder">
@@ -2681,6 +2613,320 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+});
+</script>
+<!-- Floating Call Widget -->
+<style>
+/* Floating Call Widget Styles */
+.floating-call-widget {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 9999;
+    font-family: 'Outfit', sans-serif;
+}
+
+/* Call FAB Button */
+.call-fab-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ad1f35, #e11d48);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(173, 31, 53, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.call-fab-btn:hover {
+    transform: scale(1.1) rotate(15deg);
+    box-shadow: 0 6px 24px rgba(173, 31, 53, 0.6);
+}
+
+.call-fab-btn i {
+    transition: transform 0.3s ease;
+}
+
+.call-fab-btn.active {
+    transform: scale(0.9);
+    background: #1e293b;
+    box-shadow: 0 4px 15px rgba(30, 41, 59, 0.3);
+}
+
+/* Pulse Animation for FAB */
+.pulse-ring {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: rgba(173, 31, 53, 0.4);
+    animation: callPulse 2s infinite;
+    z-index: -1;
+    pointer-events: none;
+}
+
+.pulse-ring.ring-2 {
+    animation-delay: 0.5s;
+}
+
+@keyframes callPulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1.6);
+        opacity: 0;
+    }
+}
+
+/* Call Pop-up Card */
+.call-popup-card {
+    position: absolute;
+    bottom: 80px;
+    right: 0;
+    width: 320px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px) scale(0.9);
+    transform-origin: bottom right;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    padding: 20px;
+}
+
+.call-popup-card.open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+
+/* Close Button */
+.call-popup-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: color 0.2s ease;
+}
+
+.call-popup-close:hover {
+    color: #64748b;
+}
+
+/* Card Header */
+.call-popup-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.call-popup-icon-wrap {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(173, 31, 53, 0.1);
+    color: #ad1f35;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.call-popup-title-wrap h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.call-popup-title-wrap p {
+    margin: 2px 0 0 0;
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+/* Card Body & Buttons */
+.call-popup-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.call-number-btn {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    border-radius: 10px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.call-number-btn:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    transform: translateY(-2px);
+}
+
+.call-number-btn .num-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: #fff;
+    color: #10b981;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.call-number-btn:nth-child(2) .num-icon {
+    color: #3b82f6;
+}
+
+.call-number-btn .num-details {
+    flex: 1;
+    margin-left: 12px;
+    display: flex;
+    flex-direction: column;
+}
+
+.call-number-btn .num-label {
+    font-size: 0.72rem;
+    color: #64748b;
+    font-weight: 600;
+}
+
+.call-number-btn .num-val {
+    font-size: 0.95rem;
+    color: #1e293b;
+    font-weight: 700;
+    margin-top: 1px;
+}
+
+.call-number-btn .num-arrow {
+    color: #cbd5e1;
+    font-size: 0.8rem;
+    transition: transform 0.2s ease;
+}
+
+.call-number-btn:hover .num-arrow {
+    transform: translateX(3px);
+    color: #94a3b8;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+    .floating-call-widget {
+        bottom: 80px;
+        right: 16px;
+    }
+    
+    .call-popup-card {
+        width: 280px;
+        bottom: 70px;
+    }
+}
+</style>
+
+<div class="floating-call-widget" id="floatingCallWidget">
+    <!-- Call Pop-up Card -->
+    <div class="call-popup-card" id="callPopupCard">
+        <button class="call-popup-close" onclick="toggleCallPopup(event)" aria-label="Close">
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="call-popup-header">
+            <div class="call-popup-icon-wrap">
+                <i class="fas fa-headset"></i>
+            </div>
+            <div class="call-popup-title-wrap">
+                <h3>Contact Peekey</h3>
+                <p>Call our support lines directly</p>
+            </div>
+        </div>
+        <div class="call-popup-body">
+            <a href="tel:+919495988211" class="call-number-btn">
+                <div class="num-icon"><i class="fas fa-phone-alt"></i></div>
+                <div class="num-details">
+                    <span class="num-label">Primary Support</span>
+                    <span class="num-val">+91 94959 88211</span>
+                </div>
+                <div class="num-arrow"><i class="fas fa-chevron-right"></i></div>
+            </a>
+            <a href="tel:+917012767443" class="call-number-btn">
+                <div class="num-icon"><i class="fas fa-phone-alt"></i></div>
+                <div class="num-details">
+                    <span class="num-label">General Enquiries</span>
+                    <span class="num-val">+91 70127 67443</span>
+                </div>
+                <div class="num-arrow"><i class="fas fa-chevron-right"></i></div>
+            </a>
+        </div>
+    </div>
+    
+    <!-- Floating FAB Button -->
+    <button class="call-fab-btn" id="callFabBtn" onclick="toggleCallPopup(event)" aria-label="Call Support">
+        <i class="fas fa-phone-alt" id="callFabIcon"></i>
+        <span class="pulse-ring"></span>
+        <span class="pulse-ring ring-2"></span>
+    </button>
+</div>
+
+<script>
+function toggleCallPopup(event) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  const popup = document.getElementById('callPopupCard');
+  const btn = document.getElementById('callFabBtn');
+  const icon = document.getElementById('callFabIcon');
+  if (!popup || !btn) return;
+  
+  const isOpen = popup.classList.contains('open');
+  if (isOpen) {
+    popup.classList.remove('open');
+    btn.classList.remove('active');
+    if (icon) icon.className = 'fas fa-phone-alt';
+  } else {
+    popup.classList.add('open');
+    btn.classList.add('active');
+    if (icon) icon.className = 'fas fa-times';
+  }
+}
+
+// Close popup when clicking outside
+document.addEventListener('click', function(event) {
+  const widget = document.getElementById('floatingCallWidget');
+  const popup = document.getElementById('callPopupCard');
+  const btn = document.getElementById('callFabBtn');
+  const icon = document.getElementById('callFabIcon');
+  if (!widget || !popup || !btn) return;
+  
+  if (!widget.contains(event.target) && popup.classList.contains('open')) {
+    popup.classList.remove('open');
+    btn.classList.remove('active');
+    if (icon) icon.className = 'fas fa-phone-alt';
+  }
 });
 </script>
 </body>

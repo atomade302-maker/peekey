@@ -128,6 +128,46 @@ document.addEventListener('DOMContentLoaded', () => {
         updateProductCardStatus();
     }
 
+    window.pkAddToCart = function(title, price, img) {
+        if (cart.some(item => item.title === title)) return;
+        cart.push({ title, price, img });
+        saveState();
+        showToast('Added to Cart!');
+    };
+    
+    window.pkRemoveFromCart = function(title) {
+        const index = cart.findIndex(item => item.title === title);
+        if (index !== -1) {
+            cart.splice(index, 1);
+            saveState();
+            showToast('Removed from Cart!', 'info');
+        }
+    };
+    
+    window.pkAddToWishlist = function(title, price, img) {
+        if (wishlist.some(item => item.title === title)) return;
+        wishlist.push({ title, price, img });
+        saveState();
+        showToast('Added to Wishlist!', 'wishlist');
+    };
+    
+    window.pkRemoveFromWishlist = function(title) {
+        const index = wishlist.findIndex(item => item.title === title);
+        if (index !== -1) {
+            wishlist.splice(index, 1);
+            saveState();
+            showToast('Removed from Wishlist!', 'info');
+        }
+    };
+    
+    window.pkIsInCart = function(title) {
+        return cart.some(item => item.title === title);
+    };
+    
+    window.pkIsInWishlist = function(title) {
+        return wishlist.some(item => item.title === title);
+    };
+
     window.updateProductCardStatus = function() {
         // 1. Best Sellers product cards
         document.querySelectorAll('.product-card-exact').forEach(card => {

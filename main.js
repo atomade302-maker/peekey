@@ -331,30 +331,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.target === waModal) closeWaModal();
     });
 
-    // Attach to shelf items
-    document.querySelectorAll('.shelf-item').forEach(item => {
-        item.addEventListener('click', function(e) {
-            if (e.target.closest('button')) return;
-            if (e.target.closest('img')) return;
-            e.preventDefault();
-            const name = this.querySelector('.item-name').innerText;
-            const img = this.querySelector('img').src;
-            openWaModal(name, img);
-        });
-    });
-
-    // Attach to product cards
-    document.querySelectorAll('.product-card-exact').forEach(card => {
-        // Prevent triggering if clicking Add to Cart
-        card.addEventListener('click', function(e) {
-            if (e.target.closest('button')) return; 
-            if (e.target.closest('img')) return;
-            e.preventDefault();
-            const name = this.querySelector('.product-title-exact').innerText;
-            const img = this.querySelector('img').src;
-            openWaModal(name, img);
-        });
-    });
+    // WhatsApp redirect click listeners removed to allow opening the Amazon-style Detail Modal.
 
     // Handle form submit
     waForm.addEventListener('submit', function(e) {
