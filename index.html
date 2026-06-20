@@ -12,7 +12,7 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="style.css?v=1003">
+    <link rel="stylesheet" href="style.css?v=1007">
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -306,6 +306,11 @@
     <!-- Top Search Bar -->
     <div class="top-search-bar">
         <div class="container ts-inner">
+            <!-- Mobile Hamburger Menu -->
+            <button class="mobile-hamburger-btn" id="mobileHamburgerBtn" aria-label="Menu">
+                <i class="fas fa-bars"></i>
+            </button>
+
             <a href="index.html" class="ts-logo">
                 <img src="logo.png" alt="Peekey Logo" class="header-logo-icon">
                 <img src="banner-nobg.png?v=5" alt="Peekey Banner" class="header-logo-banner">
@@ -353,6 +358,11 @@
                     <span id="userNameLabel" style="font-size:.78rem;color:#333;font-family:'Outfit',sans-serif"></span>
                 </div>
             </div>
+
+            <!-- Mobile WhatsApp Button Icon -->
+            <a href="https://wa.me/919495988211" target="_blank" class="mobile-whatsapp-btn" aria-label="WhatsApp Chat">
+                <i class="fab fa-whatsapp"></i>
+            </a>
         </div>
     </div>
 
@@ -877,9 +887,9 @@
                 <div class="footer-col-exact contact" id="contact">
                     <h4>CONTACT US</h4>
                     <ul>
-                        <li><i class="fas fa-phone-alt"></i> +91 94959 88211</li>
-                        <li><i class="fas fa-envelope"></i> info@peekey.com</li>
-                        <li><i class="fas fa-map-marker-alt"></i> ULIKKAL PO, 670705,<br>ULIKKAL CENTER MAIN ROAD</li>
+                        <li><a href="tel:+919495988211" style="color: inherit; text-decoration: none;"><i class="fas fa-phone-alt"></i> +91 94959 88211</a></li>
+                        <li><a href="mailto:info@peekey.com" style="color: inherit; text-decoration: none;"><i class="fas fa-envelope"></i> info@peekey.com</a></li>
+                        <li><a href="https://maps.google.com/?q=ULIKKAL+PO,+670705,+ULIKKAL+CENTER+MAIN+ROAD" target="_blank" style="color: inherit; text-decoration: none;"><i class="fas fa-map-marker-alt"></i> ULIKKAL PO, 670705,<br>ULIKKAL CENTER MAIN ROAD</a></li>
                     </ul>
                 </div>
             </div>
@@ -1035,7 +1045,8 @@
             e.stopPropagation();
             e.preventDefault();
 
-            const key = localStorage.getItem('pk_imgbb_key') || '';
+            const useDefault = localStorage.getItem('pk_use_default_key') !== 'false';
+            const key = useDefault ? 'f8c12c3f56c637bbf020ca4ddaedc221' : (localStorage.getItem('pk_imgbb_key') || '');
             if (!key) {
               apToast('⚠ Paste your imgbb API key in the Admin Panel (Ctrl+Shift+A) first!', 'err');
               return;
@@ -1181,7 +1192,8 @@
             if (newName === null) return;
 
             if (confirm('Do you want to change the image for this Category?')) {
-              const key = localStorage.getItem('pk_imgbb_key') || '';
+              const useDefault = localStorage.getItem('pk_use_default_key') !== 'false';
+              const key = useDefault ? 'f8c12c3f56c637bbf020ca4ddaedc221' : (localStorage.getItem('pk_imgbb_key') || '');
               if (!key) {
                 apToast('⚠ Paste your imgbb API key in the Admin Panel (Ctrl+Shift+A) first!', 'err');
                 return;
@@ -2112,7 +2124,8 @@ document.getElementById('signInOverlay').addEventListener('click', e=>{ if(e.tar
     const name  = document.getElementById('apProdName').value.trim();
     const price = document.getElementById('apProdPrice').value.trim();
     const cat   = document.getElementById('apProdCat').value;
-    const key   = localStorage.getItem(API_KEY_SK)||'';
+    const useDefault = localStorage.getItem('pk_use_default_key') !== 'false';
+    const key = useDefault ? 'f8c12c3f56c637bbf020ca4ddaedc221' : (localStorage.getItem(API_KEY_SK)||'');
     if(!name){apToast('Enter a product name!','err');return;}
     if(!key){apToast('⚠ Paste your imgbb API key first!','err');document.getElementById('apApiKey').focus();return;}
     if(!selFiles.length){apToast('Select at least one image!','err');return;}
@@ -2423,6 +2436,125 @@ document.getElementById('signInOverlay').addEventListener('click', e=>{ if(e.tar
   document.getElementById('adminOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeAdmin();});
   document.getElementById('quickEditOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeQuickEdit();});
 })();
+</script>
+
+<!-- Mobile Bottom Navigation Bar -->
+<div class="mobile-bottom-nav">
+    <a href="index.html" class="mob-nav-item active">
+        <i class="fas fa-home"></i>
+        <span>Home</span>
+    </a>
+    <a href="#catalog" class="mob-nav-item">
+        <i class="fas fa-th-large"></i>
+        <span>Categories</span>
+    </a>
+    <a href="#" class="mob-nav-item mob-wishlist-btn">
+        <div class="nav-icon-wrapper">
+            <i class="far fa-heart"></i>
+            <span class="badge" id="mob-wishlist-badge">0</span>
+        </div>
+        <span>Wishlist</span>
+    </a>
+    <a href="#" class="mob-nav-item mob-cart-btn">
+        <div class="nav-icon-wrapper">
+            <i class="fas fa-shopping-cart"></i>
+            <span class="badge" id="mob-cart-badge">0</span>
+        </div>
+        <span>Cart</span>
+    </a>
+    <a href="#" class="mob-nav-item mob-track-btn">
+        <i class="fas fa-truck"></i>
+        <span>Track</span>
+    </a>
+</div>
+
+<!-- Mobile UI Event Binding -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Hamburger Menu click
+    const mobHamburger = document.getElementById('mobileHamburgerBtn');
+    if (mobHamburger) {
+        mobHamburger.addEventListener('click', (e) => {
+            e.preventDefault();
+            const desktopOpenSidebarBtn = document.getElementById('openSidebarBtn');
+            if (desktopOpenSidebarBtn) desktopOpenSidebarBtn.click();
+        });
+    }
+
+    // Bottom Nav Item Active State Toggling
+    const navItems = document.querySelectorAll('.mob-nav-item');
+    navItems.forEach(item => {
+        item.addEventListener('click', () => {
+            navItems.forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+        });
+    });
+
+    // Categories click behavior (scrolls to catalog)
+    const categoriesNavBtn = document.querySelector('.mob-nav-item[href="#catalog"]');
+    if (categoriesNavBtn) {
+        categoriesNavBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const catalogSec = document.getElementById('catalog');
+            if (catalogSec) catalogSec.scrollIntoView({ behavior: 'smooth' });
+        });
+    }
+
+    // Wishlist click
+    const mobWishlistBtn = document.querySelector('.mob-wishlist-btn');
+    if (mobWishlistBtn) {
+        mobWishlistBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            // Find desktop wishlist button
+            const desktopWishlist = Array.from(document.querySelectorAll('.ts-action-item')).find(el => el.innerText.toLowerCase().includes('wishlist'));
+            if (desktopWishlist) {
+                desktopWishlist.click();
+            } else {
+                // fallback if text match fails
+                const wishlistModal = document.getElementById('wishlist-modal');
+                if (wishlistModal) {
+                    wishlistModal.classList.add('active');
+                    if (typeof renderWishlist === 'function') renderWishlist();
+                }
+            }
+        });
+    }
+
+    // Cart click
+    const mobCartBtn = document.querySelector('.mob-cart-btn');
+    if (mobCartBtn) {
+        mobCartBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const desktopCart = document.querySelector('.ts-action-item.cart-btn');
+            if (desktopCart) {
+                desktopCart.click();
+            } else {
+                // fallback
+                const cartModal = document.getElementById('cart-modal');
+                if (cartModal) {
+                    cartModal.classList.add('active');
+                    if (typeof renderCart === 'function') renderCart();
+                }
+            }
+        });
+    }
+
+    // Track order click
+    const mobTrackBtn = document.querySelector('.mob-track-btn');
+    if (mobTrackBtn) {
+        mobTrackBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const desktopTrack = Array.from(document.querySelectorAll('.ts-action-item')).find(el => el.innerText.toLowerCase().includes('track order'));
+            if (desktopTrack) {
+                desktopTrack.click();
+            } else {
+                // fallback
+                const trackModal = document.getElementById('track-order-modal');
+                if (trackModal) trackModal.classList.add('active');
+            }
+        });
+    }
+});
 </script>
 </body>
 </html>

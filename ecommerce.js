@@ -109,6 +109,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateBadges() {
         if (cartBadge) cartBadge.innerText = cart.length;
         if (wishlistBadge) wishlistBadge.innerText = wishlist.length;
+        
+        // Synchronize mobile bottom nav badges
+        const mobCartBadge = document.getElementById('mob-cart-badge');
+        const mobWishlistBadge = document.getElementById('mob-wishlist-badge');
+        if (mobCartBadge) mobCartBadge.innerText = cart.length;
+        if (mobWishlistBadge) mobWishlistBadge.innerText = wishlist.length;
     }
 
     function saveState() {
