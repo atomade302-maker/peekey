@@ -187,20 +187,64 @@
     }
     .pk-thumb-admin-upload {
       position: absolute;
-      inset: 0;
-      background: rgba(15, 23, 42, 0.65);
-      border: none;
+      bottom: 4px;
+      right: 4px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #0f172a;
+      border: 1px solid #cbd5e1;
       color: #ffffff;
-      font-size: 0.95rem;
+      font-size: 0.72rem;
       display: none;
       align-items: center;
       justify-content: center;
-      opacity: 0;
-      transition: opacity 0.2s;
       cursor: pointer;
       z-index: 5;
+      transition: all 0.2s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.15);
     }
-    .pk-thumb-slot:hover .pk-thumb-admin-upload {
+    .pk-thumb-admin-upload:hover {
+      background: #ad1f35;
+      transform: scale(1.1);
+    }
+    
+    .pk-thumb-admin-delete {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      color: #ef4444;
+      font-size: 0.72rem;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 5;
+      transition: all 0.2s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    }
+    .pk-thumb-admin-delete:hover {
+      background: #ef4444;
+      color: #ffffff;
+      transform: scale(1.1);
+    }
+
+    .pk-thumb-slot.placeholder-icon .pk-thumb-admin-upload {
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 0;
+      background: rgba(15, 23, 42, 0.65);
+      border: none;
+      font-size: 0.95rem;
+      opacity: 0;
+    }
+    .pk-thumb-slot.placeholder-icon:hover .pk-thumb-admin-upload {
       opacity: 1;
     }
     /* Info Panel Styles */
@@ -573,21 +617,25 @@
             <div class="pk-thumb-slot active" id="pk-thumb-url" data-type="image" data-slot="url">
               <img>
               <button class="pk-thumb-admin-upload" title="Upload Main Image"><i class="fas fa-camera"></i></button>
+              <button class="pk-thumb-admin-delete" title="Delete Main Image"><i class="fas fa-trash-alt"></i></button>
             </div>
             <!-- Image 1 -->
             <div class="pk-thumb-slot placeholder-icon" id="pk-thumb-img1" data-type="image" data-slot="img1">
               <img style="display:none">
               <button class="pk-thumb-admin-upload" title="Upload Image 1"><i class="fas fa-camera"></i></button>
+              <button class="pk-thumb-admin-delete" title="Delete Image 1"><i class="fas fa-trash-alt"></i></button>
             </div>
             <!-- Image 2 -->
             <div class="pk-thumb-slot placeholder-icon" id="pk-thumb-img2" data-type="image" data-slot="img2">
               <img style="display:none">
               <button class="pk-thumb-admin-upload" title="Upload Image 2"><i class="fas fa-camera"></i></button>
+              <button class="pk-thumb-admin-delete" title="Delete Image 2"><i class="fas fa-trash-alt"></i></button>
             </div>
             <!-- Video -->
             <div class="pk-thumb-slot placeholder-icon" id="pk-thumb-video" data-type="video" data-slot="video">
               <div class="video-thumb-play"><i class="fas fa-play"></i></div>
               <button class="pk-thumb-admin-upload" title="Configure Video"><i class="fas fa-video"></i></button>
+              <button class="pk-thumb-admin-delete" title="Delete Video"><i class="fas fa-trash-alt"></i></button>
             </div>
           </div>
         </div>
@@ -1020,6 +1068,10 @@
     document.querySelectorAll('.pk-thumb-admin-upload').forEach(btn => {
       btn.style.display = isAdmin ? 'flex' : 'none';
     });
+    document.querySelectorAll('.pk-thumb-admin-delete').forEach(btn => {
+      const isPlaceholder = btn.parentElement.classList.contains('placeholder-icon');
+      btn.style.display = (isAdmin && !isPlaceholder) ? 'flex' : 'none';
+    });
     if (adminEditTitleBtn) adminEditTitleBtn.style.display = isAdmin ? 'inline-flex' : 'none';
     if (adminEditPriceBtn) adminEditPriceBtn.style.display = isAdmin ? 'inline-flex' : 'none';
     if (adminEditSpecs) adminEditSpecs.style.display = isAdmin ? 'inline-flex' : 'none';
@@ -1078,7 +1130,7 @@
   // Thumbnail clicks (updates main display preview)
   document.querySelectorAll('.pk-thumb-slot').forEach(slot => {
     slot.addEventListener('click', function (e) {
-      if (e.target.closest('.pk-thumb-admin-upload')) return; // ignore admin click
+      if (e.target.closest('.pk-thumb-admin-upload') || e.target.closest('.pk-thumb-admin-delete')) return; // ignore admin upload/delete click
 
       document.querySelectorAll('.pk-thumb-slot').forEach(s => s.classList.remove('active'));
       this.classList.add('active');
@@ -1199,6 +1251,26 @@
       openDetailModal(currentProduct.name, originalFallbackImg, currentProduct.category);
     });
   }
+
+  // Delete thumbnail slot media directly
+  document.querySelectorAll('.pk-thumb-admin-delete').forEach(btn => {
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      e.preventDefault();
+
+      if (!currentProduct) return;
+      const slotName = this.parentElement.dataset.slot;
+      if (!confirm(`Are you sure you want to delete the media in this slot?`)) return;
+
+      saveProductField(currentProduct.name, slotName, '');
+      currentProduct[slotName] = '';
+
+      showToast('🗑️ Media deleted successfully!');
+      
+      // Update UI thumbnails & display
+      openDetailModal(currentProduct.name, originalFallbackImg, currentProduct.category);
+    });
+  });
 
   // Tab Header switching
   document.querySelectorAll('.pk-tab-btn').forEach(btn => {
