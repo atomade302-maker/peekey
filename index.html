@@ -529,7 +529,7 @@
                     <img src="mixer grinder.png" alt="Mixer Grinder" class="cat-card-img">
                     <div class="cat-card-btn"><i class="fas fa-arrow-right"></i></div>
                 </a>
-                <a href="inventory.html?q=Cooker" class="cat-card-exact">
+                <a href="inventory.html?collection=cookers" class="cat-card-exact">
                     <div class="cat-card-content">
                         <h3>Pressure<br>Cookers</h3>
                         <span class="shop-now-text">SHOP NOW &rarr;</span>
@@ -1464,6 +1464,8 @@
               <div class="item-name" style="font-weight: 800; color: #111;">Cookers Collection</div>
               <div class="item-price" style="color: #666; font-size: 0.72rem; margin-top: 4px; text-align: center; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px;">Multiple Options</div>
             `;
+            groupEl.style.cursor = 'pointer';
+            groupEl.onclick = () => window.location.href = 'inventory.html?collection=cookers';
             kitchenShelf.appendChild(groupEl);
           }
 
@@ -1543,6 +1545,189 @@
             }
           }
         });
+        if (!window.searchInitialized) {
+          initializeSearchFilter();
+          window.searchInitialized = true;
+        }
+      }
+
+      function initializeSearchFilter() {
+        const searchInput = document.querySelector('.ts-search input[type="text"]');
+        const searchBtn   = document.querySelector('.ts-search button[type="submit"]');
+        const categoryItems   = document.querySelectorAll('.search-dropdown-menu li');
+        const selectedCatText = document.getElementById('selected-category-text');
+
+        if (!searchInput) return;
+
+        if (!document.getElementById('pk-no-results')) {
+          const banner = document.createElement('div');
+          banner.id = 'pk-no-results';
+          banner.style.cssText = [
+            'display:none',
+            'text-align:center',
+            'padding:60px 20px',
+            'font-family:"Outfit",sans-serif',
+            'color:#7a8099',
+            'font-size:1.05rem',
+          ].join(';');
+          banner.innerHTML = '<i class="fas fa-search" style="font-size:2.5rem;color:#cbd5e1;display:block;margin-bottom:14px;"></i>'
+            + '<strong style="color:#1a2035;font-size:1.2rem;">No products found</strong>'
+            + '<p style="margin-top:8px;">Try a different keyword or category.</p>';
+          const catalogAnchor = document.getElementById('catalog');
+          if (catalogAnchor) catalogAnchor.after(banner);
+        }
+
+        let activeCategory = 'All Categories';
+
+        categoryItems.forEach(item => {
+          item.addEventListener('click', () => {
+            activeCategory = item.getAttribute('data-value') || 'All Categories';
+            if (selectedCatText) {
+              selectedCatText.innerHTML = activeCategory + ' <i class="fas fa-chevron-down"></i>';
+            }
+            performSearch();
+          });
+        });
+
+        if (searchBtn) {
+          searchBtn.addEventListener('click', e => {
+            e.preventDefault();
+            performSearch();
+          });
+        }
+        searchInput.addEventListener('keydown', e => {
+          if (e.key === 'Enter') { e.preventDefault(); performSearch(); }
+        });
+        searchInput.addEventListener('keyup', e => {
+          if (e.key === 'Escape' || searchInput.value.trim() === '') {
+            searchInput.value = '';
+            resetSearch();
+          }
+        });
+
+        function resetSearch() {
+          document.querySelectorAll('.inventory-section:not(#cookers-collection-section)').forEach(s => {
+            s.style.display = '';
+            s.querySelectorAll('.shelf-item').forEach(i => {
+              if (i.classList.contains('cooker-item-hidden')) {
+                i.style.display = 'none';
+              } else {
+                i.style.display = '';
+              }
+            });
+          });
+          document.querySelectorAll('.section-divider').forEach(d => d.style.display = '');
+          const bs = document.getElementById('best-sellers');
+          if (bs) {
+            bs.style.display = '';
+            bs.querySelectorAll('.product-card-exact').forEach(c => c.style.display = '');
+          }
+          const banner = document.getElementById('pk-no-results');
+          if (banner) banner.style.display = 'none';
+          if (typeof showToast === 'function') showToast('Showing all products', 'success');
+        }
+
+        function performSearch() {
+          const query = searchInput.value.toLowerCase().trim();
+
+          if (query === 'cooker' || query === 'cookers' || query === 'pressure cooker') {
+            window.location.href = 'inventory.html?collection=cookers';
+            return;
+          }
+
+          if (query !== '') {
+            const catalogEl = document.getElementById('catalog');
+            if (catalogEl) catalogEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            const cookerSec = document.getElementById('cookers-collection-section');
+            if (cookerSec) cookerSec.style.display = 'none';
+          }
+
+          let totalVisible = 0;
+
+          const inventorySections = document.querySelectorAll('.inventory-section:not(#cookers-collection-section)');
+          inventorySections.forEach(section => {
+            const shelfItems = section.querySelectorAll('.shelf-item');
+            if (shelfItems.length === 0) {
+              section.style.display = (query === '') ? '' : 'none';
+              return;
+            }
+
+            let sectionVisible = 0;
+            shelfItems.forEach(item => {
+              if (item.classList.contains('cooker-group-slot')) {
+                if (query !== '') {
+                  item.style.display = 'none';
+                } else {
+                  item.style.display = '';
+                }
+                return;
+              }
+
+              const name     = (item.getAttribute('data-name') || item.querySelector('.item-name')?.textContent || '').toLowerCase();
+              const category = (item.getAttribute('data-category') || '').toLowerCase().trim();
+
+              const words = query.split(' ').filter(Boolean);
+              const searchStr = (name + ' ' + category).toLowerCase();
+              const matchesQuery = (query === '') || words.some(w => searchStr.includes(w));
+              const matchesCategory = (activeCategory === 'All Categories') || category === activeCategory.toLowerCase().trim();
+
+              if (matchesQuery && matchesCategory) {
+                if (item.classList.contains('cooker-item-hidden') && query === '') {
+                  item.style.display = 'none';
+                } else {
+                  item.style.display = 'block';
+                  sectionVisible++;
+                  totalVisible++;
+                }
+              } else {
+                item.style.display = 'none';
+              }
+            });
+
+            const hide = (sectionVisible === 0 && query !== '');
+            section.style.display = hide ? 'none' : '';
+
+            const next = section.nextElementSibling;
+            if (next && next.classList.contains('section-divider')) {
+              next.style.display = hide ? 'none' : '';
+            }
+          });
+
+          const bestSellersSection = document.getElementById('best-sellers');
+          if (bestSellersSection) {
+            const staticCards = bestSellersSection.querySelectorAll('.product-card-exact');
+            let bsVisible = 0;
+            staticCards.forEach(card => {
+              const name     = (card.querySelector('.product-title-exact')?.textContent || '').toLowerCase();
+              const category = (card.getAttribute('data-category') || '').toLowerCase().trim();
+
+              const words = query.split(' ').filter(Boolean);
+              const searchStr = (name + ' ' + category).toLowerCase();
+              const matchesQuery = (query === '') || words.some(w => searchStr.includes(w));
+              const matchesCategory = (activeCategory === 'All Categories') || category === activeCategory.toLowerCase().trim();
+
+              if (matchesQuery && matchesCategory) {
+                card.style.display = '';
+                bsVisible++;
+                totalVisible++;
+              } else {
+                card.style.display = 'none';
+              }
+            });
+            bestSellersSection.style.display = (bsVisible === 0 && query !== '') ? 'none' : '';
+          }
+
+          const banner = document.getElementById('pk-no-results');
+          if (banner) banner.style.display = (totalVisible === 0 && query !== '') ? 'block' : 'none';
+
+          if (typeof showToast === 'function') {
+            if (query !== '') {
+               showToast(`Found ${totalVisible} items matching "${query}"`, 'success');
+            } else {
+               showToast('Showing all products', 'success');
+            }
+          }
+        }
       }
       if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',load);
       else load();

@@ -913,24 +913,8 @@ document.addEventListener('DOMContentLoaded', () => {
             showToast('Showing all products', 'success');
         }
     }
-
-    if (searchInput) {
-        // Search trigger on button click
-        if (searchBtn) {
-            searchBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                performSearch();
-            });
-        }
-
-        // Search trigger on pressing 'Enter' key
-        searchInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                performSearch();
-            }
-        });
-    }
+    // The interactive search listener has been migrated to the inline script in index.html and inventory.html
+    // to properly handle category dropdown states, clear-box behavior (Escape), and no-results banners without conflicts.
 
     // Social links click handler for "Will be soon!"
     const socialSelectors = 'a[href*="facebook"], a[href*="twitter"], a[href*="youtube"], a[href*="instagram"], .social-icons a';
