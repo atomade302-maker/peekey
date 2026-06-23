@@ -1391,7 +1391,7 @@ ul {
 }
 
 .item-image-placeholder {
-    height: 160px;
+    height: 220px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2331,11 +2331,11 @@ section, [id], .inv-anchor {
     }
     
     .product-img-box {
-        height: 165px !important;
+        height: 190px !important;
         margin-bottom: 8px !important;
         background: #ffffff !important;
         border-radius: 12px !important;
-        padding: 10px !important;
+        padding: 4px !important;
         border: 1px solid rgba(0, 0, 0, 0.03) !important;
     }
 
@@ -2428,11 +2428,11 @@ section, [id], .inv-anchor {
     }
 
     .item-image-placeholder {
-        height: 145px !important;
+        height: 180px !important;
         margin-bottom: 8px !important;
         background: #ffffff !important;
         border-radius: 12px !important;
-        padding: 10px !important;
+        padding: 4px !important;
         border: 1px solid rgba(0, 0, 0, 0.03) !important;
     }
 
