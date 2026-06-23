@@ -793,8 +793,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const dist = levenshtein(tWord, qWord);
                 const maxLen = Math.max(tWord.length, qWord.length);
                 const similarity = 1 - dist / maxLen;
-                const threshold = qWord.length <= 4 ? 0.5 : 0.6;
-                return similarity >= threshold || dist <= 2;
+                const threshold = qWord.length <= 4 ? 0.5 : 0.7;
+                return similarity >= threshold || (qWord.length > 4 && dist <= 1);
             });
         });
     }
@@ -823,9 +823,18 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // 2. Search in Dynamic Shelf Products
-        const shelfItems = document.querySelectorAll('.shelf-item');
+        const shelfItems = document.querySelectorAll('.inventory-section:not(#cookers-collection-section) .shelf-item');
         let shelfCount = 0;
         shelfItems.forEach(item => {
+            if (item.classList.contains('cooker-group-slot')) {
+                if (query !== '') {
+                    item.style.display = 'none';
+                } else {
+                    item.style.display = 'block';
+                }
+                return;
+            }
+
             const name = item.getAttribute('data-name') || (item.querySelector('.item-name') ? item.querySelector('.item-name').innerText : '');
             const cat = item.getAttribute('data-category');
             
@@ -833,15 +842,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const matchesCat = (selectedCat === 'All Categories' || cat === selectedCat);
             
             if (matchesQuery && matchesCat) {
-                item.style.display = 'block';
-                shelfCount++;
+                if (item.classList.contains('cooker-item-hidden') && query === '') {
+                    item.style.display = 'none';
+                } else {
+                    item.style.display = 'block';
+                    shelfCount++;
+                }
             } else {
                 item.style.display = 'none';
             }
         });
 
         // Hide/Show dynamic sections depending on whether they contain visible products
-        const sections = document.querySelectorAll('.inventory-section');
+        const sections = document.querySelectorAll('.inventory-section:not(#cookers-collection-section)');
         sections.forEach(section => {
             const visibleItems = section.querySelectorAll('.shelf-item:not([style*="display: none"])');
             const divider = section.nextElementSibling;
@@ -868,6 +881,23 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 bestSellersSec.style.display = 'block';
             }
+        }
+
+        // 3. No Products Found Banner
+        let banner = document.getElementById('pk-no-results');
+        if (!banner) {
+            banner = document.createElement('div');
+            banner.id = 'pk-no-results';
+            banner.style.cssText = 'display:none;text-align:center;padding:60px 20px;font-family:"Outfit",sans-serif;color:#7a8099;font-size:1.05rem;';
+            banner.innerHTML = '<i class="fas fa-search" style="font-size:2.5rem;color:#cbd5e1;display:block;margin-bottom:14px;"></i><strong style="color:#1a2035;font-size:1.2rem;">No products found</strong><p style="margin-top:8px;">Try a different keyword or category.</p>';
+            const catalogAnchor = document.getElementById('catalog');
+            if (catalogAnchor) catalogAnchor.after(banner);
+        }
+
+        if (query !== '' && bestSellerCount + shelfCount === 0) {
+            if (banner) banner.style.display = 'block';
+        } else {
+            if (banner) banner.style.display = 'none';
         }
 
         // Scroll to Best Sellers or Catalog if a query was searched

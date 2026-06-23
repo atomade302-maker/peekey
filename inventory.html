@@ -1,0 +1,2643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peekey - Premium Appliances & Crockery</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css?v=1008">
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script>
+    // ► PASTE YOUR FIREBASE CONFIG HERE (from Firebase Console → Project Settings)
+    const FIREBASE_CONFIG = {
+      apiKey: "AIzaSyDORHIlkHTnmxTG6Pgc-tPNrzwOXvIFabs",
+      authDomain: "peekey-store-ulikkal.firebaseapp.com",
+      projectId: "peekey-store-ulikkal",
+      storageBucket: "peekey-store-ulikkal.firebasestorage.app",
+      messagingSenderId: "1025478049798",
+      appId: "1:1025478049798:web:73d416aa0f0b357b710387"
+    };
+    let firebaseReady = false;
+    try {
+      if (FIREBASE_CONFIG.apiKey) {
+        firebase.initializeApp(FIREBASE_CONFIG);
+        firebaseReady = true;
+      }
+    } catch(e) {}
+    </script>
+    <style>
+    /* Quick Edit Modal */
+    #quickEditOverlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 100000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+      padding: 16px;
+    }
+    .qe-card {
+      background: #fff;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 440px;
+      padding: 24px;
+      font-family: 'Outfit', sans-serif;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      position: relative;
+      animation: qePop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    @keyframes qePop {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    @media (max-width: 480px) {
+      .qe-card {
+        padding: 16px;
+        border-radius: 12px;
+        max-width: 95%;
+      }
+      .qe-img-box img {
+        height: 70px;
+      }
+    }
+    /* Admin Mode Highlight on shelves */
+    .admin-mode-active .shelf-item {
+      position: relative;
+      cursor: pointer;
+    }
+    .admin-mode-active .shelf-item::after {
+      content: '⚙️ Edit';
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      background: rgba(173, 31, 53, 0.9);
+      color: #fff;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 3px 6px;
+      border-radius: 4px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      z-index: 10;
+    }
+    .admin-mode-active .shelf-item:hover::after {
+      opacity: 1;
+    }
+
+    /* Style for new Dual Dropzone in Admin Overlay */
+    .ap-dual-dz {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .ap-dz-wrap {
+      display: flex;
+      flex-direction: column;
+    }
+    .ap-dz-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      width: fit-content;
+    }
+    .ap-dz-badge.required {
+      background: rgba(173, 31, 53, 0.15);
+      color: #ad1f35;
+    }
+    .ap-dz-badge.optional {
+      background: rgba(245, 158, 11, 0.15);
+      color: #f59e0b;
+    }
+    @media (max-width: 600px) {
+      .ap-dual-dz {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Style for image slots in Quick Edit Modal */
+    .qe-imgs-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .qe-img-box {
+      background: #f8f9fa;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 8px;
+      text-align: center;
+      cursor: pointer;
+      position: relative;
+      transition: border-color 0.2s ease;
+    }
+    .qe-img-box:hover {
+      border-color: #ad1f35;
+    }
+    .qe-img-box img {
+      width: 100%;
+      height: 90px;
+      object-fit: contain;
+      border-radius: 6px;
+      display: block;
+      margin-bottom: 4px;
+    }
+    .qe-img-label {
+      font-size: 0.68rem;
+      color: #666;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .qe-img-badge {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      font-size: 0.6rem;
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-weight: 700;
+    }
+    .qe-img-badge.set {
+      background: rgba(16, 185, 129, 0.15);
+      color: #10b981;
+    }
+    .qe-img-badge.missing {
+      background: rgba(107, 116, 148, 0.15);
+      color: #6b7494;
+    }
+    .qe-uploading {
+      font-size: 0.8rem;
+      color: #f59e0b;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+    /* Inline description upload button for admin */
+    .ap-inline-desc-btn {
+      position: absolute;
+      bottom: 6px;
+      right: 6px;
+      background: rgba(245, 158, 11, 0.95);
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 3px 6px;
+      cursor: pointer;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+      transition: all 0.2s ease;
+      font-family: 'Outfit', sans-serif;
+    }
+    .ap-inline-desc-btn:hover {
+      background: #d97706;
+      transform: scale(1.05);
+    }
+    </style>
+</head>
+<body>
+
+
+
+    <div class="right-notch-btn" id="openSidebarBtn">
+        <i class="fas fa-ellipsis-v"></i>
+    </div>
+
+    <!-- Right Sidebar -->
+    <div class="right-sidebar-overlay" id="rightSidebarOverlay"></div>
+    <div class="right-sidebar" id="rightSidebar">
+        <button class="close-sidebar-btn" id="closeSidebarBtn"><i class="fas fa-times"></i></button>
+        <div class="sidebar-logo">
+            <h2 style="color:var(--red); font-weight:900; font-size: 2rem;">PEEKEY</h2>
+        </div>
+        <ul class="sidebar-nav" style="margin-bottom: 25px;">
+            <li><a href="#brands" class="sidebar-link"><i class="fas fa-tags"></i> Brands</a></li>
+            <li><a href="#offers" class="sidebar-link"><i class="fas fa-percent"></i> Offers</a></li>
+            <li><a href="#contact" class="sidebar-link"><i class="fas fa-phone-alt"></i> Contact Us</a></li>
+            <li>
+                <a href="#" class="sidebar-link" onclick="event.preventDefault(); document.getElementById('closeSidebarBtn').click(); openTrackOrder();">
+                    <i class="fas fa-truck"></i> Track Order
+                </a>
+            </li>
+            <li id="sidebarUserLi">
+                <a href="#" class="sidebar-link" onclick="event.preventDefault(); document.getElementById('closeSidebarBtn').click(); openSignIn();">
+                    <i class="fas fa-user-circle"></i> <span id="sidebarUserText">Sign In</span>
+                </a>
+            </li>
+        </ul>
+
+        <!-- Sidebar Cart & Wishlist Section -->
+        <div class="sidebar-cart-wishlist" style="border-top:1px solid #eee; padding-top:20px; margin-top:20px;">
+            <!-- Cart Box -->
+            <div class="page-cart-box" style="margin-bottom: 30px;">
+                <h3 style="font-size:1.15rem; font-weight:700; color:#1e293b; margin-bottom:15px; display:flex; align-items:center; gap:8px; border-bottom:2px solid #f1f5f9; padding-bottom:8px;">
+                    <i class="fas fa-shopping-cart" style="color:var(--red);"></i> Shopping Cart (<span id="page-cart-count">0</span>)
+                </h3>
+                <div id="page-cart-items" style="display:flex; flex-direction:column; gap:12px; margin-bottom:15px;">
+                    <!-- Cart items rendered dynamically -->
+                </div>
+                <div id="page-cart-summary" style="display:none; border-top:1px solid #f1f5f9; padding-top:15px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; font-size:1rem; font-weight:700; color:#1e293b; margin-bottom:15px;">
+                        <span>Subtotal:</span>
+                        <span id="page-cart-total" style="color:var(--red); font-size:1.15rem;">₹0</span>
+                    </div>
+                    
+                    <!-- Sleek Inline Checkout Form inside Sidebar -->
+                    <div class="inline-checkout-form" style="background:#f8fafc; border-radius:10px; padding:12px; border:1px solid #cbd5e1; margin-bottom:15px;">
+                        <h4 style="font-size:0.85rem; font-weight:700; color:#475569; margin-bottom:10px; text-transform:uppercase; letter-spacing:0.5px; margin-top:0;">Delivery Details</h4>
+                        <div style="display:flex; flex-direction:column; gap:8px;">
+                            <input type="text" id="checkout-name" placeholder="Your Name" style="width:100%; padding:8px 10px; border-radius:6px; border:1px solid #cbd5e1; font-size:0.85rem; font-family:inherit;">
+                            <input type="text" id="checkout-phone" placeholder="WhatsApp Number" style="width:100%; padding:8px 10px; border-radius:6px; border:1px solid #cbd5e1; font-size:0.85rem; font-family:inherit;">
+                            <textarea id="checkout-address" placeholder="Delivery Address" rows="2" style="width:100%; padding:8px 10px; border-radius:6px; border:1px solid #cbd5e1; font-size:0.85rem; font-family:inherit; resize:vertical;"></textarea>
+                        </div>
+                    </div>
+                    
+                    <button class="btn-orange w-100" id="page-checkout-btn" style="background:var(--green); border-color:var(--green); font-size:0.95rem; padding:10px; display:flex; align-items:center; justify-content:center; gap:6px; border-radius:20px; font-weight:700; color:#fff; cursor:pointer; width:100%; border:none;">
+                        <i class="fab fa-whatsapp"></i> Buy All via WhatsApp
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Wishlist Box -->
+            <div class="page-wishlist-box">
+                <h3 style="font-size:1.15rem; font-weight:700; color:#1e293b; margin-bottom:15px; display:flex; align-items:center; gap:8px; border-bottom:2px solid #f1f5f9; padding-bottom:8px;">
+                    <i class="fas fa-heart" style="color:var(--red);"></i> My Wishlist (<span id="page-wishlist-count">0</span>)
+                </h3>
+                <div id="page-wishlist-items" style="display:flex; flex-direction:column; gap:12px;">
+                    <!-- Wishlist items rendered dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Top Search Bar -->
+    <div class="top-search-bar">
+        <div class="container ts-inner">
+            <!-- Mobile Hamburger Menu -->
+            <button class="mobile-hamburger-btn" id="mobileHamburgerBtn" aria-label="Menu">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <a href="index.html" class="ts-logo">
+                <img src="logo.png" alt="Peekey Logo" class="header-logo-icon">
+                <img src="banner-nobg.png?v=5" alt="Peekey Banner" class="header-logo-banner">
+            </a>
+            
+            <div class="ts-search">
+                <div class="search-dropdown">
+                    <span id="selected-category-text">All Categories <i class="fas fa-chevron-down"></i></span>
+                    <ul class="search-dropdown-menu">
+                        <li data-value="All Categories">All Categories</li>
+                        <li data-value="Home Appliances">Home Appliances</li>
+                        <li data-value="Kitchenware">Kitchenware</li>
+                        <li data-value="Crockery & Dining">Crockery & Dining</li>
+                        <li data-value="Pooja & Devotional">Pooja & Devotional</li>
+                        <li data-value="Home Essentials">Home Essentials</li>
+                        <li data-value="Electrical & Lighting">Electrical & Lighting</li>
+                        <li data-value="Gas Stoves & Hobs">Gas Stoves & Hobs</li>
+                    </ul>
+                </div>
+                <input type="text" placeholder="Search for products, brands and more...">
+                <button type="submit"><i class="fas fa-search"></i></button>
+            </div>
+            
+            <div class="ts-actions">
+                <a href="#catalog" class="ts-action-item">
+                    <i class="fas fa-user"></i>
+                    <span>Track Order</span>
+                </a>
+                <a href="#catalog" class="ts-action-item">
+                    <i class="far fa-heart"></i>
+                    <span>Wishlist</span>
+                </a>
+                <a href="#catalog" class="ts-action-item cart-btn">
+                    <div class="cart-icon-wrapper">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="badge">0</span>
+                    </div>
+                    <span>Cart</span>
+                </a>
+                <!-- Sign In / User Button -->
+                <div id="signinBtn" class="ts-action-item" style="cursor:pointer" onclick="openSignIn()">
+                    <i class="fas fa-circle-user"></i>
+                    <span>Sign In</span>
+                </div>
+                <div id="userBtn" style="display:none;cursor:pointer;align-items:center;gap:8px" onclick="openSignIn()">
+                    <div id="userAvatar" style="width:32px;height:32px;border-radius:50%;background:#ad1f35;display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;color:#fff"></div>
+                    <span id="userNameLabel" style="font-size:.78rem;color:#333;font-family:'Outfit',sans-serif"></span>
+                </div>
+            </div>
+
+            <!-- Mobile WhatsApp Button Icon -->
+            <a href="https://wa.me/919495988211" target="_blank" class="mobile-whatsapp-btn" aria-label="WhatsApp Chat">
+                <i class="fab fa-whatsapp"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Navigation Bar -->
+    <nav class="main-nav-bar">
+        <div class="nav-inner-wrapper">
+            <div class="shop-category-btn">
+                <i class="fas fa-bars"></i>
+                <span>SHOP BY CATEGORY</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="active">HOME</a></li>
+                                <li><a href="#catalog">INVENTORY</a></li>
+                <li><a href="#catalog">APPLIANCES</a></li>
+                <li><a href="#catalog">CROCKERY</a></li>
+                <li><a href="#best-sellers">BEST SELLERS</a></li>
+                
+                                            </ul>
+        </div>
+    </nav>
+
+    <!-- ===== CATALOG SECTION (merged from inventory) ===== -->
+    <a class="inv-anchor" id="catalog"></a>
+
+    <div class="inventory-page-title container">
+        <h1>Our Complete Catalog</h1>
+        <p>Explore our premium collection of appliances and home essentials.</p>
+    </div>
+
+    <!-- Style for Cooker Group Slot stack effect -->
+    <style>
+        .cooker-group-slot .item-image-placeholder {
+            position: relative;
+            overflow: visible !important;
+            z-index: 1;
+        }
+        .cooker-group-slot .item-image-placeholder::after {
+            content: '';
+            position: absolute;
+            inset: 4px;
+            border-radius: 8px;
+            border: 1px solid rgba(0,0,0,0.06);
+            background: #fff;
+            z-index: -1;
+            transform: rotate(3deg) translate(2px, 2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+            transition: 0.3s ease;
+        }
+        .cooker-group-slot .item-image-placeholder::before {
+            content: '';
+            position: absolute;
+            inset: 4px;
+            border-radius: 8px;
+            border: 1px solid rgba(0,0,0,0.06);
+            background: #fff;
+            z-index: -2;
+            transform: rotate(-3deg) translate(-2px, -2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+            transition: 0.3s ease;
+        }
+        .cooker-group-slot:hover .item-image-placeholder::after {
+            transform: rotate(7deg) translate(5px, 5px);
+        }
+        .cooker-group-slot:hover .item-image-placeholder::before {
+            transform: rotate(-7deg) translate(-5px, -5px);
+        }
+        .cooker-group-slot .shelf-actions {
+            display: none !important;
+        }
+        .cooker-item-hidden {
+            display: none;
+        }
+    </style>
+
+    <!-- Cookers Collection Sub-Section -->
+    <section class="inventory-section section-padding" id="cookers-collection-section" style="display: none; background: #fffdfd; border-top: 1.5px dashed rgba(173, 31, 53, 0.2); border-bottom: 1.5px dashed rgba(173, 31, 53, 0.2); padding: 40px 0; margin-bottom: 25px; box-shadow: inset 0 0 15px rgba(173, 31, 53, 0.02);">
+        <div class="container" style="position: relative;">
+            <button id="close-cookers-btn" style="position: absolute; top: -10px; right: 15px; background: #fff; border: 1.5px solid #ddd; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #666; font-size: 1.1rem; transition: 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.08); z-index: 10;" onmouseover="this.style.background='#ad1f35';this.style.color='#fff';this.style.borderColor='#ad1f35';" onmouseout="this.style.background='#fff';this.style.color='#666';this.style.borderColor='#ddd';">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="section-title-new" style="margin-bottom: 30px;">
+                <div class="line"></div>
+                <h2 style="color: var(--red); display: flex; align-items: center; gap: 8px;"><i class="fas fa-utensils"></i> Cookers Collection</h2>
+                <div class="line"></div>
+            </div>
+            <div class="shelf-container" id="shelf-cookers">
+                <!-- Cooker items will be loaded here dynamically -->
+            </div>
+        </div>
+    </section>
+
+    <section class="inventory-section section-padding">
+        <div class="container">
+            <div class="section-title-new"><div class="line"></div><h2>🍳 KITCHEN &amp; DINING</h2><div class="line"></div></div>
+            <div class="shelf-container" id="shelf-kitchen"></div>
+        </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <section class="inventory-section section-padding" style="background:#fafafa;">
+        <div class="container">
+            <div class="section-title-new"><div class="line"></div><h2>🔌 ELECTRICALS &amp; LIGHTING</h2><div class="line"></div></div>
+            <div class="shelf-container" id="shelf-electrical"></div>
+        </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <section class="inventory-section section-padding">
+        <div class="container">
+            <div class="section-title-new"><div class="line"></div><h2>🪔 HOME &amp; DEVOTIONAL ESSENTIALS</h2><div class="line"></div></div>
+            <div class="shelf-container" id="shelf-home"></div>
+        </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <section class="inventory-section section-padding" style="background:#fafafa;">
+        <div class="container">
+            <div class="section-title-new"><div class="line"></div><h2>TOP BRANDS WE FEATURE</h2><div class="line"></div></div>
+            <div class="brands-grid-inventory">
+                <div class="brand-tag-inventory">Prestige</div><div class="brand-tag-inventory">Preethi</div>
+                <div class="brand-tag-inventory">Butterfly</div><div class="brand-tag-inventory">Hawkins</div>
+                <div class="brand-tag-inventory">Pigeon</div><div class="brand-tag-inventory">Borosil</div>
+                <div class="brand-tag-inventory">Wonderchef</div><div class="brand-tag-inventory">Milton</div>
+                <div class="brand-tag-inventory">Cello</div><div class="brand-tag-inventory">La Opala</div>
+                <div class="brand-tag-inventory">Clay Craft</div><div class="brand-tag-inventory">Varmora</div>
+                <div class="brand-tag-inventory">Bajaj</div><div class="brand-tag-inventory">Usha</div>
+                <div class="brand-tag-inventory">Crompton</div><div class="brand-tag-inventory">Philips</div>
+                <div class="brand-tag-inventory">Supreme</div><div class="brand-tag-inventory">Nilkamal</div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Newsletter -->
+    <section class="section-padding" style="padding-bottom: 0;">
+        <div class="container">
+            <div class="newsletter-exact">
+                <div class="nl-left">
+                    <div class="nl-icon"><i class="far fa-envelope"></i></div>
+                    <div class="nl-text">
+                        <h3>Stay Updated with<br>Latest Offers & New Arrivals</h3>
+                        <p>Subscribe to our newsletter and never miss a deal!</p>
+                    </div>
+                </div>
+                <div class="nl-right">
+                    <input type="email" placeholder="Enter your email address">
+                    <button class="btn-orange">SUBSCRIBE</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer-exact" id="contact">
+        <div class="container">
+            <div class="footer-grid-exact">
+                <div class="footer-col-exact brand">
+                    <img src="logo.png" alt="Logo">
+                    <p>Your trusted destination for premium home appliances, cookware & kitchen essentials.</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-col-exact">
+                    <h4>SHOP</h4>
+                    <ul>
+                        <li><a href="#">All Categories</a></li>
+                        <li><a href="#">Best Sellers</a></li>
+                        <li><a href="#">New Arrivals</a></li>
+                        <li><a href="#">Offers</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col-exact">
+                    <h4>BRANDS</h4>
+                    <ul>
+                        <li><a href="#">All Brands</a></li>
+                        <li><a href="#">Top Brands</a></li>
+                        <li><a href="#">Brand Stores</a></li>
+                        <li><a href="#">Brand Offers</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col-exact">
+                    <h4>HELP</h4>
+                    <ul>
+                                                <li><a href="#">Returns & Refunds</a></li>
+                        <li><a href="#">Shipping Policy</a></li>
+                        <li><a href="#">FAQs</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col-exact">
+                    <h4>COMPANY</h4>
+                    <ul>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Our Stores</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Contact Us</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col-exact contact" id="contact">
+                    <h4>CONTACT US</h4>
+                    <ul>
+                        <li><a href="tel:+919495988211" style="color: inherit; text-decoration: none;"><i class="fas fa-phone-alt"></i> +91 94959 88211</a></li>
+                        <li><a href="tel:+917012767443" style="color: inherit; text-decoration: none;"><i class="fas fa-phone-alt"></i> +91 70127 67443</a></li>
+                        <li><a href="mailto:anvarsadikh786@gmail.com" style="color: inherit; text-decoration: none;"><i class="fas fa-envelope"></i> anvarsadikh786@gmail.com</a></li>
+                        <li><a href="https://maps.app.goo.gl/anzAXeuXoRe4LNdaA" target="_blank" style="color: inherit; text-decoration: none;"><i class="fas fa-map-marker-alt"></i> ULIKKAL PO, 670705,<br>ULIKKAL CENTER MAIN ROAD</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Embedded Google Map + Location Details -->
+            <div style="margin: 36px 0 24px; border-radius: 14px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 8px 30px rgba(0,0,0,0.4); display: flex; flex-wrap: wrap; min-height: 280px;">
+                <!-- Map Embed -->
+                <div style="flex: 2; min-width: 280px; min-height: 280px;">
+                    <iframe
+                        src="https://maps.google.com/maps?q=Peekey+metals+ulikkal&output=embed&z=16"
+                        width="100%"
+                        height="280"
+                        style="border:0; display:block;"
+                        allowfullscreen=""
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade"
+                        title="Peekey Store Location">
+                    </iframe>
+                </div>
+                <!-- Location Info Panel -->
+                <div style="flex: 1; min-width: 240px; background: linear-gradient(135deg, #1a2e20, #0f1a14); padding: 30px 26px; display: flex; flex-direction: column; justify-content: center; gap: 16px; border-left: 1px solid rgba(255,255,255,0.06);">
+                    <h4 style="color: var(--red); font-size: 0.78rem; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; margin: 0;">📍 Find Us Here</h4>
+                    <div style="display: flex; gap: 12px; align-items: flex-start;">
+                        <i class="fas fa-map-marker-alt" style="color: var(--red); margin-top: 4px; flex-shrink: 0; font-size: 1rem;"></i>
+                        <div>
+                            <p style="color: #fff; font-weight: 700; font-size: 0.92rem; margin: 0 0 4px; font-family: 'Outfit', sans-serif;">Peekey Metals &amp; Appliances</p>
+                            <p style="color: rgba(255,255,255,0.58); font-size: 0.82rem; margin: 0; line-height: 1.6; font-family: 'Outfit', sans-serif;">Ulikkal Center Main Road,<br>Ulikkal PO – 670705,<br>Kannur District, Kerala</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 12px; align-items: flex-start;">
+                        <i class="fas fa-phone-alt" style="color: var(--red); flex-shrink: 0; font-size: 0.9rem; margin-top: 3px;"></i>
+                        <div style="display: flex; flex-direction: column; gap: 6px;">
+                            <a href="tel:+919495988211" style="color: rgba(255,255,255,0.72); font-size: 0.85rem; text-decoration: none; font-family: 'Outfit', sans-serif;">+91 94959 88211</a>
+                            <a href="tel:+917012767443" style="color: rgba(255,255,255,0.72); font-size: 0.85rem; text-decoration: none; font-family: 'Outfit', sans-serif;">+91 70127 67443</a>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 12px; align-items: center;">
+                        <i class="fas fa-envelope" style="color: var(--red); flex-shrink: 0; font-size: 0.9rem;"></i>
+                        <a href="mailto:anvarsadikh786@gmail.com" style="color: rgba(255,255,255,0.72); font-size: 0.8rem; text-decoration: none; font-family: 'Outfit', sans-serif;">anvarsadikh786@gmail.com</a>
+                    </div>
+                    <div style="display: flex; gap: 12px; align-items: center;">
+                        <i class="fas fa-clock" style="color: var(--red); flex-shrink: 0; font-size: 0.9rem;"></i>
+                        <span style="color: rgba(255,255,255,0.58); font-size: 0.82rem; font-family: 'Outfit', sans-serif;">Mon – Sat &nbsp;|&nbsp; 9:00 AM – 7:00 PM</span>
+                    </div>
+                    <a href="https://maps.app.goo.gl/anzAXeuXoRe4LNdaA" target="_blank"
+                       style="display: inline-flex; align-items: center; gap: 8px; background: var(--red); color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; text-decoration: none; transition: 0.2s; width: fit-content; font-family: 'Outfit', sans-serif; margin-top: 4px;"
+                       onmouseover="this.style.background='#a00d24'" onmouseout="this.style.background='var(--red)'">
+                        <i class="fas fa-directions"></i> Get Directions
+                    </a>
+                </div>
+            </div>
+
+            <div class="footer-bottom-exact">
+                <p>&copy; 2026 Peekey. All Rights Reserved.</p>
+                <div class="footer-links">
+                    <a href="#">Privacy Policy</a> | <a href="#">Terms & Conditions</a>
+                </div>
+                <div class="payment-methods">
+                    <i class="fab fa-cc-visa"></i>
+                    <i class="fab fa-cc-mastercard"></i>
+                    <i class="fab fa-cc-paypal"></i>
+                    <i class="fab fa-google-pay"></i>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="main.js?v=1003"></script>
+    <script src="ecommerce.js?v=1004"></script>
+    <script src="cloud-images.js?v=1003"></script>
+    <script src="desc-popup.js?v=1004"></script>
+    <script>CloudImages.applyToPage();</script>
+    <script>
+    // Load admin-uploaded cloud products into the correct shelf sections
+    (function(){
+      const SK = 'peekey_products_v2';
+      const CAT_ORDER = ['Home Appliances','Kitchenware','Crockery & Dining','Pooja & Devotional','Home Essentials','Electrical & Lighting','Gas Stoves & Hobs'];
+      const ADMIN_EMAIL = 'peekeymetalsulikkal@gmail.com';
+
+      const DEFAULT_PRODUCTS = [
+        // Home Appliances
+        { id: "def-mixer", name: "Mixer Grinder", category: "Home Appliances", url: "Mixer Grinder.png", price: "", at: 1718360000000 },
+        { id: "def-wet", name: "Wet Grinder", category: "Home Appliances", url: "Wet Grinder.png", price: "", at: 1718360000000 },
+        { id: "def-juicer", name: "Juicer", category: "Home Appliances", url: "Juicer.png", price: "", at: 1718360000000 },
+        { id: "def-rice", name: "Rice Cooker", category: "Home Appliances", url: "Rice Cooker.png", price: "", at: 1718360000000 },
+        { id: "def-air", name: "Air Fryer", category: "Home Appliances", url: "Air Fryer.png", price: "", at: 1718360000000 },
+        { id: "def-toaster", name: "Toaster", category: "Home Appliances", url: "Toaster.png", price: "", at: 1718360000000 },
+        { id: "def-sandwich", name: "Sandwich Maker", category: "Home Appliances", url: "Sandwich Maker.png", price: "", at: 1718360000000 },
+        { id: "def-heater", name: "Water Heater", category: "Home Appliances", url: "Water Heater.png", price: "", at: 1718360000000 },
+        { id: "def-fan", name: "Exhaust Fan", category: "Home Appliances", url: "Exhaust Fan.png", price: "", at: 1718360000000 },
+        { id: "def-purifier", name: "Water Purifier", category: "Home Appliances", url: "Water Purifier.png", price: "", at: 1718360000000 },
+
+        // Kitchenware
+        { id: "def-triply", name: "Triply Cookware", category: "Kitchenware", url: "Triply Cookware.png", price: "", at: 1718360000000 },
+        { id: "def-cast", name: "Cast Iron Cookware", category: "Kitchenware", url: "Cast Iron Cookware.png", price: "", at: 1718360000000 },
+        { id: "def-nonstick", name: "Non-Stick Cookware", category: "Kitchenware", url: "Non-Stick Cookware.png", price: "", at: 1718360000000 },
+        { id: "def-fry", name: "Fry Pan", category: "Kitchenware", url: "Fry Pan.png", price: "", at: 1718360000000 },
+        { id: "def-tawa", name: "Dosa Tawa", category: "Kitchenware", url: "Dosa Tawa.png", price: "", at: 1718360000000 },
+        { id: "def-appam", name: "Appam Pan", category: "Kitchenware", url: "Appam Pan.png", price: "", at: 1718360000000 },
+        { id: "def-sauce", name: "Sauce Pan", category: "Kitchenware", url: "Sauce Pan.png", price: "", at: 1718360000000 },
+        { id: "def-stock", name: "Stock Pot", category: "Kitchenware", url: "Stock Pot.png", price: "", at: 1718360000000 },
+        { id: "def-boiler", name: "Milk Boiler", category: "Kitchenware", url: "Milk Boiler.png", price: "", at: 1718360000000 },
+        { id: "def-copper", name: "Copper Bottles", category: "Kitchenware", url: "brass bottle.png", price: "", at: 1718360000000 },
+        { id: "def-brass", name: "Brass Utensils", category: "Kitchenware", url: "Brass Utensils.png", price: "", at: 1718360000000 },
+        { id: "def-wooden", name: "Wooden Spoons", category: "Kitchenware", url: "Wooden Spoon.png", price: "", at: 1718360000000 },
+        { id: "def-chop", name: "Chopping Boards", category: "Kitchenware", url: "Chopping Boards.png", price: "", at: 1718360000000 },
+        { id: "def-knives", name: "Kitchen Knives", category: "Kitchenware", url: "Kitchen Knives.png", price: "", at: 1718360000000 },
+        { id: "def-graters", name: "Graters", category: "Kitchenware", url: "Graters.png", price: "", at: 1718360000000 },
+        { id: "def-mortar", name: "Mortar & Pestle", category: "Kitchenware", url: "Mortar and Pestle.png", price: "", at: 1718360000000 },
+
+        // Crockery & Dining
+        { id: "def-cplates", name: "Ceramic Plates", category: "Crockery & Dining", url: "Ceramic Plates.png", price: "", at: 1718360000000 },
+        { id: "def-ssplates", name: "SS Plates", category: "Crockery & Dining", url: "Stainless Steel Plates.png", price: "", at: 1718360000000 },
+        { id: "def-sbowls", name: "Soup Bowls", category: "Crockery & Dining", url: "Soup Bowls.png", price: "", at: 1718360000000 },
+        { id: "def-svbowls", name: "Serving Bowls", category: "Crockery & Dining", url: "Serving Bowls.png", price: "", at: 1718360000000 },
+        { id: "def-mugs", name: "Coffee Mugs", category: "Crockery & Dining", url: "Coffee Mugs.png", price: "", at: 1718360000000 },
+        { id: "def-jugs", name: "Water Jugs", category: "Crockery & Dining", url: "Water Jugs.png", price: "", at: 1718360000000 },
+        { id: "def-trays", name: "Serving Trays", category: "Crockery & Dining", url: "Serving Trays.png", price: "", at: 1718360000000 },
+        { id: "def-cutlery", name: "Cutlery Sets", category: "Crockery & Dining", url: "Cutlery Sets.png", price: "", at: 1718360000000 },
+        { id: "def-spoons", name: "Spoons", category: "Crockery & Dining", url: "Spoons.png", price: "", at: 1718360000000 },
+        { id: "def-stands", name: "Cake Stands", category: "Crockery & Dining", url: "Cake Stands.png", price: "", at: 1718360000000 },
+        { id: "def-dplates", name: "Dessert Plates", category: "Crockery & Dining", url: "Dessert Plates.png", price: "", at: 1718360000000 },
+        { id: "def-containers", name: "Storage Containers", category: "Crockery & Dining", url: "Storage Containers.png", price: "", at: 1718360000000 },
+
+        // Pooja & Devotional
+        { id: "def-nilavilakku", name: "Kerala Nilavilakku", category: "Pooja & Devotional", url: "Kerala Nilavilakku.png", price: "", at: 1718360000000 },
+        { id: "def-bvilakku", name: "Brass Vilakku", category: "Pooja & Devotional", url: "Brass Vilakku.png", price: "", at: 1718360000000 },
+        { id: "def-kvilakku", name: "Kuthu Vilakku", category: "Pooja & Devotional", url: "Kuthu Vilakku.png", price: "", at: 1718360000000 },
+        { id: "def-bell", name: "Brass Bell", category: "Pooja & Devotional", url: "Brass Bell.png", price: "", at: 1718360000000 },
+        { id: "def-thali", name: "Pooja Thali", category: "Pooja & Devotional", url: "Pooja Thali.png", price: "", at: 1718360000000 },
+        { id: "def-kalash", name: "Copper Kalash", category: "Pooja & Devotional", url: "Copper Kalash.png", price: "", at: 1718360000000 },
+        { id: "def-panchapathram", name: "Panchapathram Set", category: "Pooja & Devotional", url: "Panchapathram Set.png", price: "", at: 1718360000000 },
+
+        // Home Essentials
+        { id: "def-wbottle", name: "Water Bottles", category: "Home Essentials", url: "water bottle.png", price: "", at: 1718360000000 },
+        { id: "def-sbottle", name: "Steel Bottles", category: "Home Essentials", url: "steel water bottle.png", price: "", at: 1718360000000 },
+        { id: "def-flask", name: "Vacuum Flasks", category: "Home Essentials", url: "vacuum flask.png", price: "", at: 1718360000000 },
+        { id: "def-lunch", name: "Lunch Boxes", category: "Home Essentials", url: "lunch box.png", price: "", at: 1718360000000 },
+        { id: "def-fstorage", name: "Food Storage", category: "Home Essentials", url: "Food Storage Containers.png", price: "", at: 1718360000000 },
+        { id: "def-jars", name: "Storage Jars", category: "Home Essentials", url: "Kitchen Storage Jars.png", price: "", at: 1718360000000 },
+        { id: "def-pchairs", name: "Plastic Chairs", category: "Home Essentials", url: "Plastic Chairs.png", price: "", at: 1718360000000 },
+        { id: "def-fchairs", name: "Folding Chairs", category: "Home Essentials", url: "foldable Chairs.png", price: "", at: 1718360000000 },
+        { id: "def-bins", name: "Dustbins", category: "Home Essentials", url: "Dustbins.png", price: "", at: 1718360000000 },
+        { id: "def-baskets", name: "Laundry Baskets", category: "Home Essentials", url: "Laundry Baskets.png", price: "", at: 1718360000000 },
+        { id: "def-kracks", name: "Kitchen Racks", category: "Home Essentials", url: "Kitchen Racks.png", price: "", at: 1718360000000 },
+        { id: "def-sracks", name: "Shoe Racks", category: "Home Essentials", url: "Shoe Racks.png", price: "", at: 1718360000000 },
+        { id: "def-buckets", name: "Buckets", category: "Home Essentials", url: "Buckets.png", price: "", at: 1718360000000 },
+        { id: "def-brushes", name: "Cleaning Brushes", category: "Home Essentials", url: "Cleaning Brushes.png", price: "", at: 1718360000000 }
+      ];
+
+      // ── Initialize LocalStorage Catalog if not already set ───────
+      if (!localStorage.getItem('pk_initialized')) {
+        localStorage.setItem(SK, JSON.stringify(DEFAULT_PRODUCTS));
+        localStorage.setItem('pk_initialized', '1');
+      } else {
+        // Sanitize legacy asset paths in LocalStorage
+        try {
+          let stored = localStorage.getItem(SK);
+          if (stored) {
+            let parsed = JSON.parse(stored);
+            let updated = false;
+            parsed.forEach(p => {
+              if (p.url && p.url.includes('/') && !p.url.startsWith('http') && !p.url.startsWith('data:')) {
+                p.url = p.url.split('/').pop();
+                updated = true;
+              }
+              if (p.descUrl && p.descUrl.includes('/') && !p.descUrl.startsWith('http') && !p.descUrl.startsWith('data:')) {
+                p.descUrl = p.descUrl.split('/').pop();
+                updated = true;
+              }
+            });
+            if (updated) {
+              localStorage.setItem(SK, JSON.stringify(parsed));
+            }
+          }
+        } catch(e) {}
+      }
+
+      function attachInlineDescUploadButtons() {
+        document.querySelectorAll('.ap-inline-desc-btn').forEach(btn => btn.remove());
+        const isAdmin = sessionStorage.getItem('pk_user_email') === ADMIN_EMAIL;
+        if (!isAdmin) return;
+
+        // 1. Product cards & shelf items
+        const containers = document.querySelectorAll('.item-image-placeholder, .product-img-box');
+        containers.forEach(container => {
+          container.style.position = 'relative';
+          const card = container.closest('.shelf-item, .product-card-exact');
+          if (!card) return;
+
+          const productName = card.querySelector('.item-name, .product-title-exact')?.innerText.trim();
+          const imgEl = container.querySelector('img');
+          const productImgUrl = imgEl ? imgEl.getAttribute('src') : '';
+
+          const btn = document.createElement('button');
+          btn.className = 'ap-inline-desc-btn';
+          btn.innerHTML = '<i class="fas fa-file-invoice"></i> + Spec';
+          btn.title = 'Upload Description / Spec Image';
+
+          btn.onclick = function(e) {
+            e.stopPropagation();
+            e.preventDefault();
+
+            const useDefault = localStorage.getItem('pk_use_default_key') !== 'false';
+            const key = useDefault ? 'f8c12c3f56c637bbf020ca4ddaedc221' : (localStorage.getItem('pk_imgbb_key') || '');
+            if (!key) {
+              apToast('⚠ Paste your imgbb API key in the Admin Panel (Ctrl+Shift+A) first!', 'err');
+              return;
+            }
+
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = 'image/*';
+            fileInput.style.display = 'none';
+
+            fileInput.onchange = async () => {
+              const file = fileInput.files[0];
+              if (!file) return;
+
+              btn.disabled = true;
+              btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>...';
+
+              try {
+                const b64 = await new Promise((r, j) => {
+                  const fr = new FileReader();
+                  fr.onload = () => r(fr.result);
+                  fr.onerror = j;
+                  fr.readAsDataURL(file);
+                });
+
+                const fd = new FormData();
+                fd.append('key', key);
+                fd.append('image', b64.split(',')[1]);
+                fd.append('name', 'desc-' + productName.replace(/\s+/g, '-'));
+
+                const res = await fetch('https://api.imgbb.com/1/upload', { method: 'POST', body: fd });
+                const data = await res.json();
+
+                if (data.success && data.data?.url) {
+                  const uploadedUrl = data.data.display_url || data.data.url;
+                  let products = JSON.parse(localStorage.getItem(SK) || '[]');
+                  
+                  let p = null;
+                  const pkid = card.dataset.pkid;
+                  if (pkid) {
+                    p = products.find(prod => prod.id === pkid);
+                  }
+                  if (!p && productName) {
+                    p = products.find(prod => prod.name && prod.name.toLowerCase().trim() === productName.toLowerCase().trim());
+                  }
+
+                  if (!p) {
+                    p = {
+                      id: 'static-' + Date.now(),
+                      name: productName,
+                      category: card.getAttribute('data-category') || 'Home Appliances',
+                      url: productImgUrl,
+                      at: Date.now()
+                    };
+                    products.push(p);
+                  }
+
+                  p.descUrl = uploadedUrl;
+                  localStorage.setItem(SK, JSON.stringify(products));
+                  apToast('Description image uploaded successfully!', 'ok');
+                  
+                  window.dispatchEvent(new CustomEvent('pk_products_updated'));
+                  window.dispatchEvent(new StorageEvent('storage', { key: SK }));
+                } else {
+                  apToast('Upload failed: ' + (data.error?.message || 'Unknown error'), 'err');
+                }
+              } catch(err) {
+                console.error(err);
+                apToast('Upload error: ' + err.message, 'err');
+              } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-file-invoice"></i> + Spec';
+              }
+            };
+
+            fileInput.click();
+          };
+
+          container.appendChild(btn);
+        });
+
+        // 2. Best Sellers card click — image clicks handled by desc-popup.js capture listener
+        // 2. Best Sellers card click — Handled by desc-popup.js Detail Modal.
+
+        // 3. Category cards inline edit/replace buttons (.cat-card-exact)
+        document.querySelectorAll('.cat-card-exact').forEach(card => {
+          card.style.position = 'relative';
+          const titleEl = card.querySelector('h3');
+          if (!titleEl) return;
+          const origName = card.dataset.origName || titleEl.innerHTML.replace(/<br>/g, ' ').replace(/\s+/g, ' ').trim();
+
+          const btn = document.createElement('button');
+          btn.className = 'ap-inline-desc-btn';
+          btn.style.background = '#ad1f35';
+          btn.style.bottom = '10px';
+          btn.style.right = '10px';
+          btn.innerHTML = '<i class="fas fa-edit"></i> Edit';
+          btn.title = 'Edit Category Title & Image';
+
+          btn.onclick = function(e) {
+            e.stopPropagation();
+            e.preventDefault();
+
+            let currentName = origName;
+            let customCats = {};
+            try { customCats = JSON.parse(localStorage.getItem('peekey_custom_categories') || '{}'); } catch(e) {}
+            if (customCats[origName] && customCats[origName].name) {
+              currentName = customCats[origName].name;
+            }
+
+            const newName = prompt('Enter new Category Name:', currentName);
+            if (newName === null) return;
+
+            if (confirm('Do you want to change the image for this Category?')) {
+              const useDefault = localStorage.getItem('pk_use_default_key') !== 'false';
+              const key = useDefault ? 'f8c12c3f56c637bbf020ca4ddaedc221' : (localStorage.getItem('pk_imgbb_key') || '');
+              if (!key) {
+                apToast('⚠ Paste your imgbb API key in the Admin Panel (Ctrl+Shift+A) first!', 'err');
+                return;
+              }
+
+              const fileInput = document.createElement('input');
+              fileInput.type = 'file';
+              fileInput.accept = 'image/*';
+              fileInput.style.display = 'none';
+
+              fileInput.onchange = async () => {
+                const file = fileInput.files[0];
+                if (!file) return;
+
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>...';
+
+                try {
+                  const b64 = await new Promise((r, j) => {
+                    const fr = new FileReader();
+                    fr.onload = () => r(fr.result);
+                    fr.onerror = j;
+                    fr.readAsDataURL(file);
+                  });
+
+                  const fd = new FormData();
+                  fd.append('key', key);
+                  fd.append('image', b64.split(',')[1]);
+                  fd.append('name', 'cat-' + newName.replace(/\s+/g, '-'));
+
+                  const res = await fetch('https://api.imgbb.com/1/upload', { method: 'POST', body: fd });
+                  const data = await res.json();
+
+                  if (data.success && data.data?.url) {
+                    const uploadedUrl = data.data.display_url || data.data.url;
+                    
+                    let customCats = {};
+                    try { customCats = JSON.parse(localStorage.getItem('peekey_custom_categories') || '{}'); } catch(e) {}
+                    customCats[origName] = {
+                      name: newName,
+                      url: uploadedUrl
+                    };
+                    localStorage.setItem('peekey_custom_categories', JSON.stringify(customCats));
+                    apToast('Category updated successfully!', 'ok');
+                    
+                    syncStaticSections();
+                  } else {
+                    apToast('Upload failed: ' + (data.error?.message || 'Unknown error'), 'err');
+                  }
+                } catch(err) {
+                  console.error(err);
+                  apToast('Upload error: ' + err.message, 'err');
+                } finally {
+                  btn.disabled = false;
+                  btn.innerHTML = '<i class="fas fa-edit"></i> Edit';
+                }
+              };
+
+              fileInput.click();
+            } else {
+              let customCats = {};
+              try { customCats = JSON.parse(localStorage.getItem('peekey_custom_categories') || '{}'); } catch(e) {}
+              const existingUrl = customCats[origName] ? customCats[origName].url : '';
+              customCats[origName] = {
+                name: newName,
+                url: existingUrl
+              };
+              localStorage.setItem('peekey_custom_categories', JSON.stringify(customCats));
+              apToast('Category name updated!', 'ok');
+              syncStaticSections();
+            }
+          };
+        });
+      }
+
+      function openCookersSection() {
+        const sec = document.getElementById('cookers-collection-section');
+        if (sec) {
+          sec.style.display = 'block';
+          sec.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+      window.openCookersSection = openCookersSection;
+
+      function closeCookersSection() {
+        const sec = document.getElementById('cookers-collection-section');
+        if (sec) {
+          sec.style.display = 'none';
+        }
+      }
+      window.closeCookersSection = closeCookersSection;
+
+      function initCloseCookersBtn() {
+        const btn = document.getElementById('close-cookers-btn');
+        if (btn) {
+          btn.addEventListener('click', closeCookersSection);
+        }
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initCloseCookersBtn);
+      } else {
+        initCloseCookersBtn();
+      }
+
+      function load(){
+        // Remove old dynamic elements
+        document.querySelectorAll('.shelf-item.pk-cloud-item').forEach(el => el.remove());
+
+        const shelfCookers = document.getElementById('shelf-cookers');
+        if (shelfCookers) shelfCookers.innerHTML = '';
+
+        let products;
+        try{ products = JSON.parse(localStorage.getItem(SK)||'[]'); }catch{ return; }
+        if(!products.length) return;
+
+        // Check if admin is currently logged in
+        const isAdmin = sessionStorage.getItem('pk_user_email') === ADMIN_EMAIL;
+        if(isAdmin) {
+          document.body.classList.add('admin-mode-active');
+        } else {
+          document.body.classList.remove('admin-mode-active');
+        }
+
+        // Group cooker products
+        const cookerProducts = products.filter(p => (p.name || '').toLowerCase().includes('cooker')).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+        const otherProducts = products.filter(p => !(p.name || '').toLowerCase().includes('cooker')).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+
+        // Helper to render a shelf item
+        function renderItem(p, isHiddenCooker = false) {
+          const el = document.createElement('div');
+          el.className = 'shelf-item pk-cloud-item' + (isHiddenCooker ? ' cooker-item-hidden' : '');
+          el.dataset.pkid = p.id;
+          el.setAttribute('data-category', p.category);
+          el.setAttribute('data-name', p.name);
+
+          el.innerHTML = `
+            <div class="item-image-placeholder">
+              <img src="${p.url}" alt="${p.name}" loading="lazy"
+                onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'80\' height=\'80\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%23cbd5e1\' stroke-width=\'1.5\'><rect x=\'3\' y=\'3\' width=\'18\' height=\'18\' rx=\'2\'/><circle cx=\'8.5\' cy=\'8.5\' r=\'1.5\'/><polyline points=\'21 15 16 10 5 21\'/></svg>';this.style.padding='20px';this.style.background='#f1f5f9';">
+            </div>
+            <div class="item-name">${p.name}</div>
+            ${p.price ? `<div class="item-price" style="color:#ad1f35;font-weight:700;font-size:0.85rem;margin-top:4px;text-align:center;">₹${p.price}</div>` : '<div class="item-price" style="color:#666;font-size:0.75rem;margin-top:4px;text-align:center;">Ask Price</div>'}
+            <div class="shelf-actions">
+              <button class="shelf-wishlist-btn" title="Add to Wishlist"><i class="far fa-heart"></i></button>
+              <button class="shelf-cart-btn" title="Add to Cart"><i class="fas fa-shopping-cart"></i></button>
+            </div>
+          `;
+          return el;
+        }
+
+        // Render other products on normal shelves
+        otherProducts.forEach((p) => {
+          let shelfId = 'shelf-home';
+          const cat = p.category;
+          const name = (p.name || '').toLowerCase();
+          
+          if (cat === 'Electrical & Lighting') {
+            shelfId = 'shelf-electrical';
+          } else if (cat === 'Kitchenware' || cat === 'Crockery & Dining' || cat === 'Gas Stoves & Hobs') {
+            shelfId = 'shelf-kitchen';
+          } else if (cat === 'Home Appliances') {
+            const kitchenKeywords = ['mixer', 'grinder', 'juicer', 'cooker', 'fryer', 'toaster', 'sandwich', 'induction', 'kettle', 'stove', 'oven', 'pan', 'tawa', 'pot', 'boiler', 'bottle', 'flask', 'mug', 'cup', 'plate', 'bowl', 'spoon', 'fork', 'knife', 'cutlery'];
+            const isKitchen = kitchenKeywords.some(keyword => name.includes(keyword));
+            if (isKitchen) {
+              shelfId = 'shelf-kitchen';
+            } else {
+              shelfId = 'shelf-electrical';
+            }
+          }
+          
+          const shelf = document.getElementById(shelfId);
+          if(!shelf) return;
+          const el = renderItem(p, false);
+          shelf.appendChild(el);
+        });
+
+        // If we have cooker products, render them:
+        if (cookerProducts.length > 0) {
+          // 1. Render Cooker Group Slot on Kitchen Shelf
+          const kitchenShelf = document.getElementById('shelf-kitchen');
+          if (kitchenShelf) {
+            const groupEl = document.createElement('div');
+            groupEl.className = 'shelf-item pk-cloud-item cooker-group-slot';
+            groupEl.setAttribute('data-category', 'Kitchenware');
+            groupEl.setAttribute('data-name', 'Cookers Collection');
+            groupEl.innerHTML = `
+              <div class="item-image-placeholder">
+                <img src="${cookerProducts[0].url}" alt="Cookers Collection" loading="lazy"
+                  onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'80\' height=\'80\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%23cbd5e1\' stroke-width=\'1.5\\'><rect x=\\'3\\' y=\\'3\\' width=\\'18\\' height=\\'18\\' rx=\\'2\\'/><circle cx=\\'8.5\\' cy=\\'8.5\\' r=\\'1.5\\'/><polyline points=\\'21 15 16 10 5 21\\'/></svg>';this.style.padding='20px';this.style.background='#f1f5f9';">
+                <span style="position: absolute; bottom: 8px; right: 8px; background: rgba(173,31,53,0.9); color: #fff; padding: 3px 8px; font-size: 0.65rem; border-radius: 20px; font-weight: 700; border: 1px solid rgba(255,255,255,0.2); letter-spacing: 0.5px; box-shadow: 0 2px 6px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 4px;">
+                  <i class="fas fa-layer-group"></i> ${cookerProducts.length} Items
+                </span>
+              </div>
+              <div class="item-name" style="font-weight: 800; color: #111;">Cookers Collection</div>
+              <div class="item-price" style="color: #666; font-size: 0.72rem; margin-top: 4px; text-align: center; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px;">Multiple Options</div>
+            `;
+            kitchenShelf.appendChild(groupEl);
+          }
+
+          // 2. Render individual cookers on Kitchen Shelf but HIDDEN (for search mapping)
+          if (kitchenShelf) {
+            cookerProducts.forEach(p => {
+              const el = renderItem(p, true);
+              kitchenShelf.appendChild(el);
+            });
+          }
+
+          // 3. Render individual cookers inside the Cooker Collection shelf
+          if (shelfCookers) {
+            cookerProducts.forEach(p => {
+              const el = renderItem(p, false);
+              shelfCookers.appendChild(el);
+            });
+          }
+        }
+
+        attachInlineDescUploadButtons();
+        syncStaticSections();
+        // Search filter initialization is now handled entirely by ecommerce.js
+        if (window.updateProductCardStatus) {
+          window.updateProductCardStatus();
+        }
+      }
+
+      let searchInitialized = false;
+
+      function syncStaticSections() {
+        const products = JSON.parse(localStorage.getItem(SK) || '[]');
+        
+        document.querySelectorAll('.product-card-exact').forEach(card => {
+          const titleEl = card.querySelector('.product-title-exact');
+          if (!titleEl) return;
+          if (!card.dataset.origName) {
+            card.dataset.origName = titleEl.innerText.trim();
+          }
+          
+          const origName = card.dataset.origName;
+          const p = products.find(prod => 
+            (prod.name && prod.name.toLowerCase().trim() === origName.toLowerCase().trim())
+          );
+          
+          if (p) {
+            const img = card.querySelector('.product-img-box img');
+            if (img && p.url) img.src = p.url;
+            titleEl.innerText = p.name;
+            const priceEl = card.querySelector('.current');
+            if (priceEl && p.price) priceEl.innerText = '₹' + p.price;
+          }
+        });
+
+        let customCats = {};
+        try {
+          customCats = JSON.parse(localStorage.getItem('peekey_custom_categories') || '{}');
+        } catch(e) {}
+
+        document.querySelectorAll('.cat-card-exact').forEach(card => {
+          const titleEl = card.querySelector('h3');
+          if (!titleEl) return;
+          
+          const origName = titleEl.innerHTML.replace(/<br>/g, ' ').replace(/\s+/g, ' ').trim();
+          if (!card.dataset.origName) {
+            card.dataset.origName = origName;
+          }
+          
+          const catData = customCats[card.dataset.origName];
+          if (catData) {
+            if (catData.url) {
+              const img = card.querySelector('.cat-card-img');
+              if (img) img.src = catData.url;
+            }
+            if (catData.name) {
+              titleEl.innerHTML = catData.name.replace(' ', '<br>');
+            }
+          }
+        });
+      }
+
+
+
+      if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',load);
+      else load();
+      window.addEventListener('storage', e => { if(e.key===SK) load(); });
+      window.addEventListener('pk_products_updated', load);
+      // Listen to sign-in / logout events to update admin-mode-active classes
+      window.addEventListener('pk_auth_changed', load);
+    })();
+    </script>
+
+<!-- ═══════════════════════════════════════════════════
+     HIDDEN ADMIN UPLOAD PANEL
+     Access: Press Ctrl + Shift + A on the website
+     ═══════════════════════════════════════════════════ -->
+<style>
+#adminOverlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:99999;display:none;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
+#adminOverlay.open{display:flex}
+#adminPanel{background:#0c0e14;border:1px solid #2a2f42;border-radius:20px;width:96vw;max-width:860px;max-height:90vh;overflow-y:auto;font-family:'Outfit',sans-serif;color:#e8eaf0}
+.ap-header{background:linear-gradient(135deg,#1a0810,#1e2435);padding:20px 28px;border-radius:20px 20px 0 0;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #2a2f42;position:sticky;top:0;z-index:10}
+.ap-header h2{font-size:1.1rem;font-weight:800;color:#ad1f35}
+.ap-header h2 span{color:#e8eaf0;font-weight:400;font-size:.8rem;margin-left:8px}
+.ap-close{background:none;border:none;color:#7a8099;font-size:1.3rem;cursor:pointer;padding:4px 8px;border-radius:6px;transition:.2s}
+.ap-close:hover{color:#fff;background:#2a2f42}
+.ap-body{padding:28px}
+/* Login */
+#apLogin{text-align:center}
+#apLogin .lock-icon{font-size:3rem;margin-bottom:12px;display:block}
+#apLogin h3{font-size:1.2rem;font-weight:700;margin-bottom:6px}
+#apLogin p{color:#7a8099;font-size:.85rem;margin-bottom:24px}
+#apPassInput{width:100%;max-width:320px;padding:12px 18px;background:#161b27;border:1px solid #2a2f42;border-radius:10px;color:#e8eaf0;font-family:'Outfit',sans-serif;font-size:1rem;outline:none;text-align:center;margin-bottom:12px;transition:.2s}
+#apPassInput:focus{border-color:#ad1f35}
+#apLoginBtn{padding:11px 32px;background:#ad1f35;color:#fff;border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-weight:700;font-size:.95rem;cursor:pointer;transition:.2s}
+#apLoginBtn:hover{background:#c8293e}
+#apLoginError{color:#ef4444;font-size:.82rem;margin-top:8px;display:none}
+/* Dashboard */
+#apDash{display:none}
+.ap-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:28px}
+.ap-stat{background:#161b27;border:1px solid #2a2f42;border-radius:12px;padding:18px;text-align:center}
+.ap-stat .num{font-size:1.8rem;font-weight:800;color:#ad1f35}
+.ap-stat .lbl{color:#7a8099;font-size:.78rem;margin-top:3px}
+.ap-section{background:#161b27;border:1px solid #2a2f42;border-radius:14px;padding:22px;margin-bottom:20px}
+.ap-section h3{font-size:1rem;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.ap-section h3 i{color:#ad1f35}
+.ap-section p{color:#7a8099;font-size:.82rem;margin-bottom:18px}
+.ap-form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+.ap-fg label{display:block;font-size:.75rem;color:#7a8099;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px}
+.ap-fg input,.ap-fg select{width:100%;padding:10px 14px;background:#0c0e14;border:1px solid #2a2f42;border-radius:8px;color:#e8eaf0;font-family:'Outfit',sans-serif;font-size:.9rem;outline:none;transition:.2s}
+.ap-fg input:focus,.ap-fg select:focus{border-color:#ad1f35}
+.ap-fg select option{background:#0c0e14}
+.ap-dropzone{border:2px dashed #2a2f42;border-radius:12px;padding:36px;text-align:center;cursor:pointer;background:#0c0e14;transition:.2s}
+.ap-dropzone:hover,.ap-dropzone.over{border-color:#ad1f35;background:#1a0810}
+.ap-dropzone i{font-size:2.2rem;color:#7a8099;display:block;margin-bottom:10px}
+.ap-dropzone p{color:#7a8099;font-size:.85rem}
+.ap-dropzone p span{color:#ad1f35;font-weight:600}
+#apFileInput{display:none}
+.ap-previews{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.ap-prev-item{position:relative;width:90px;height:90px;border-radius:8px;overflow:hidden;border:2px solid #2a2f42}
+.ap-prev-item img{width:100%;height:100%;object-fit:cover}
+.ap-prev-remove{position:absolute;top:3px;right:3px;background:rgba(0,0,0,.7);border:none;color:#fff;border-radius:50%;width:20px;height:20px;font-size:.6rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.ap-prog-wrap{height:6px;background:#2a2f42;border-radius:3px;margin-top:14px;display:none;overflow:hidden}
+.ap-prog-bar{height:100%;background:#ad1f35;border-radius:3px;width:0;transition:width .3s}
+.ap-actions{display:flex;gap:10px;margin-top:16px}
+.ap-btn-up{padding:11px 24px;background:#ad1f35;color:#fff;border:none;border-radius:8px;font-family:'Outfit',sans-serif;font-weight:700;font-size:.9rem;cursor:pointer;display:flex;align-items:center;gap:8px;transition:.2s}
+.ap-btn-up:hover{background:#c8293e}
+.ap-btn-up:disabled{opacity:.4;cursor:not-allowed}
+.ap-btn-logout{padding:11px 18px;background:#161b27;border:1px solid #2a2f42;color:#7a8099;border-radius:8px;font-family:'Outfit',sans-serif;font-size:.85rem;cursor:pointer;transition:.2s}
+.ap-btn-logout:hover{border-color:#ef4444;color:#ef4444}
+/* Uploaded Grid */
+.ap-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px}
+.ap-card{background:#0c0e14;border:1px solid #2a2f42;border-radius:10px;overflow:hidden;transition:.2s}
+.ap-card:hover{border-color:#ad1f35}
+.ap-card img{width:100%;height:90px;object-fit:cover}
+.ap-card-body{padding:8px}
+.ap-card-name{font-size:.75rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ap-card-cat{font-size:.65rem;color:#ad1f35;text-transform:uppercase;letter-spacing:1px;margin:2px 0 8px}
+.ap-btn-del{width:100%;padding:5px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);border-radius:6px;color:#ef4444;font-size:.72rem;cursor:pointer;font-family:'Outfit',sans-serif;transition:.2s}
+.ap-btn-del:hover{background:rgba(239,68,68,.25)}
+.ap-empty{text-align:center;padding:40px;color:#3a3f52;font-size:.85rem}
+.ap-empty i{font-size:2rem;display:block;margin-bottom:10px}
+/* Toast */
+#apToast{position:fixed;bottom:24px;right:24px;background:#161b27;border:1px solid #2a2f42;border-radius:10px;padding:12px 20px;font-size:.85rem;font-family:'Outfit',sans-serif;color:#e8eaf0;z-index:999999;display:flex;align-items:center;gap:10px;transform:translateY(80px);opacity:0;transition:all .35s}
+#apToast.show{transform:translateY(0);opacity:1}
+#apToast.ok i{color:#10b981}
+#apToast.err i{color:#ef4444}
+@media(max-width:600px){.ap-form-row{grid-template-columns:1fr}.ap-stats{grid-template-columns:repeat(3,1fr)}}
+/* Floating Admin Button */
+#adminFloatBtn{position:fixed;bottom:24px;left:24px;z-index:9999;background:#ad1f35;color:#fff;border:none;border-radius:50px;padding:10px 18px;font-family:'Outfit',sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px;box-shadow:0 4px 20px rgba(173,31,53,.4);transition:.2s}
+#adminFloatBtn:hover{background:#c0392b;transform:translateY(-2px)}
+@media(max-width:768px){#adminFloatBtn{display:none!important;}}
+.ap-api-box{background:#0c0e14;border:1px solid #2a2f42;border-radius:10px;padding:16px;margin-bottom:18px}
+.ap-api-box label{display:block;font-size:.75rem;color:#7a8099;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px}
+.ap-api-row{display:flex;gap:10px;align-items:center}
+.ap-api-row input{flex:1;padding:10px 14px;background:#161b27;border:1px solid #2a2f42;border-radius:8px;color:#e8eaf0;font-family:'Outfit',sans-serif;font-size:.9rem;outline:none;transition:.2s}
+.ap-api-row input:focus{border-color:#ad1f35}
+.ap-api-save{padding:10px 16px;background:#ad1f35;color:#fff;border:none;border-radius:8px;font-family:'Outfit',sans-serif;font-weight:700;font-size:.85rem;cursor:pointer;white-space:nowrap}
+.ap-api-status{font-size:.78rem;margin-top:8px}
+.ap-api-status.ok{color:#10b981}
+.ap-api-status.warn{color:#f59e0b}
+.ap-api-link{color:#ad1f35;font-size:.78rem;margin-top:6px;display:block}
+</style>
+
+<!-- Floating Admin Button (hidden until admin logs in) -->
+<button id="adminFloatBtn" onclick="openAdmin()" style="display:none !important"><i class="fas fa-lock"></i> Admin Panel</button>
+
+<!-- Sign In Modal -->
+<style>
+#signInOverlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:99998;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+#signInOverlay.open{display:flex}
+.si-card{background:#fff;border-radius:16px;width:100%;max-width:380px;padding:36px;font-family:'Outfit',sans-serif;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.si-close{position:absolute;top:14px;right:14px;background:none;border:none;font-size:1.2rem;cursor:pointer;color:#999}
+.si-logo{text-align:center;margin-bottom:20px}
+.si-logo img{width:40px}
+.si-logo h2{font-size:1.4rem;font-weight:800;color:#ad1f35;margin-top:6px}
+.si-logo p{font-size:.82rem;color:#666;margin-top:2px}
+.si-field{margin-bottom:14px}
+.si-field label{display:block;font-size:.75rem;color:#555;margin-bottom:5px;font-weight:600}
+.si-field input{width:100%;padding:11px 14px;border:1.5px solid #ddd;border-radius:8px;font-family:'Outfit',sans-serif;font-size:.95rem;outline:none;transition:.2s;color:#333}
+.si-field input:focus{border-color:#ad1f35}
+.si-btn{width:100%;padding:12px;background:#ad1f35;color:#fff;border:none;border-radius:8px;font-family:'Outfit',sans-serif;font-weight:700;font-size:1rem;cursor:pointer;margin-top:6px;transition:.2s}
+.si-btn:hover{background:#c0392b}
+.si-err{color:#ef4444;font-size:.8rem;margin-top:8px;text-align:center;display:none}
+.si-user-info{display:flex;align-items:center;gap:12px;padding:14px;background:#fff8f8;border-radius:10px;margin-bottom:16px;border:1px solid #fde8e8}
+.si-user-avatar{width:44px;height:44px;border-radius:50%;background:#ad1f35;display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:800;color:#fff;flex-shrink:0}
+.si-user-name{font-weight:700;font-size:.95rem;color:#333}
+.si-user-email{font-size:.78rem;color:#888}
+.si-signout-btn{width:100%;padding:11px;background:#f5f5f5;border:1px solid #ddd;border-radius:8px;font-family:'Outfit',sans-serif;font-weight:600;font-size:.9rem;cursor:pointer;color:#555;transition:.2s}
+.si-signout-btn:hover{background:#ffe5e5;border-color:#ad1f35;color:#ad1f35}
+.si-admin-badge{background:#fff0f0;border:1px solid #fecaca;border-radius:8px;padding:10px 14px;text-align:center;font-size:.8rem;color:#ad1f35;font-weight:600;margin-bottom:14px}
+</style>
+
+<div id="signInOverlay">
+  <div class="si-card">
+    <button class="si-close" onclick="closeSignIn()"><i class="fas fa-times"></i></button>
+    <!-- Login Form -->
+    <div id="siForm">
+      <div class="si-logo">
+        <h2>PEEKEY</h2>
+        <p>Sign in to your account</p>
+      </div>
+
+      <!-- Google Sign-In Button -->
+      <button id="googleSignInBtn" onclick="doGoogleSignIn()" style="width:100%;padding:11px 14px;background:#fff;border:2px solid #ddd;border-radius:8px;font-family:'Outfit',sans-serif;font-size:.95rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;color:#444;transition:.2s;margin-bottom:16px" onmouseover="this.style.borderColor='#4285f4';this.style.boxShadow='0 2px 8px rgba(66,133,244,.2)'" onmouseout="this.style.borderColor='#ddd';this.style.boxShadow='none'">
+        <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.716v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z"/></svg>
+        Continue with Google
+      </button>
+      <div id="googleNote" style="display:none;font-size:.73rem;color:#f59e0b;text-align:center;margin-bottom:12px;padding:8px;background:#fffbeb;border-radius:6px;border:1px solid #fde68a">
+        ⚠ Firebase not configured. Use email login below or <a href="https://console.firebase.google.com" target="_blank" style="color:#ad1f35">set up Firebase</a>.
+      </div>
+
+      <!-- Divider -->
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+        <div style="flex:1;height:1px;background:#eee"></div>
+        <span style="font-size:.75rem;color:#aaa">or sign in with email</span>
+        <div style="flex:1;height:1px;background:#eee"></div>
+      </div>
+
+      <div class="si-field"><label>Gmail Address</label><input type="email" id="siEmail" placeholder="yourname@gmail.com"></div>
+      <div class="si-field"><label>Password</label><input type="password" id="siPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doSignIn()"></div>
+      <button class="si-btn" onclick="doSignIn()"><i class="fas fa-sign-in-alt"></i> Sign In</button>
+      <p class="si-err" id="siErr">❌ Invalid email or password.</p>
+    </div>
+    <!-- Logged In State -->
+    <div id="siLoggedIn" style="display:none">
+      <div class="si-logo"><h2>PEEKEY</h2></div>
+      <div class="si-admin-badge" id="siAdminBadge" style="display:none">🛡 Admin Access Granted</div>
+      <div class="si-user-info">
+        <div class="si-user-avatar" id="siAvatar"></div>
+        <div><div class="si-user-name" id="siName"></div><div class="si-user-email" id="siEmailDisplay"></div></div>
+      </div>
+      <button class="si-signout-btn" onclick="doSignOut()"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
+    </div>
+  </div>
+</div>
+
+<!-- Admin Overlay -->
+<div id="adminOverlay">
+  <div id="adminPanel">
+    <div class="ap-header">
+      <h2>PEEKEY <span>Admin Upload Panel</span></h2>
+      <button class="ap-close" onclick="closeAdmin()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="ap-body">
+
+      <!-- LOGIN -->
+      <div id="apLogin" style="text-align: center; padding: 40px 20px;">
+        <span class="lock-icon" style="font-size: 3rem; display: block; margin-bottom: 15px;">🛡️</span>
+        <h3 style="font-size: 1.4rem; color: #fff; margin-bottom: 10px;">Admin Access Required</h3>
+        <p style="color: #a0aec0; margin-bottom: 25px; max-width: 320px; margin-left: auto; margin-right: auto; line-height: 1.5;">This panel is only accessible to the store administrator. Please sign in with the authorized admin Google Account.</p>
+        <button id="apLoginBtn" onclick="closeAdmin(); openSignIn();" style="padding: 12px 24px; background: #ad1f35; color: #fff; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 0.95rem; transition: 0.2s;"><i class="fab fa-google"></i> Sign In as Admin</button>
+      </div>
+
+      <!-- DASHBOARD -->
+      <div id="apDash">
+        <!-- Stats -->
+        <div class="ap-stats">
+          <div class="ap-stat"><div class="num" id="apStatTotal">0</div><div class="lbl">Uploaded</div></div>
+          <div class="ap-stat"><div class="num" id="apStatCats">0</div><div class="lbl">Categories</div></div>
+          <div class="ap-stat"><div class="num" id="apStatNew">0</div><div class="lbl">This Week</div></div>
+        </div>
+
+        <!-- Upload Form -->
+        <div class="ap-section">
+          <h3><i class="fas fa-cloud-arrow-up"></i> Upload Product Image</h3>
+          <p>Upload images here — they instantly appear on this website in the correct category.</p>
+
+          <div class="ap-form-row" style="grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 14px;">
+            <div class="ap-fg">
+              <label>Product Name</label>
+              <input type="text" id="apProdName" placeholder="e.g. Pressure Cooker 5L" oninput="apAutoDetectCat(this.value)">
+              <div class="ap-auto-detect" id="apAutoDetect" style="font-size:0.75rem; color:#f59e0b; margin-top:5px; display:none;"><i class="fas fa-magic"></i> Auto-detected category</div>
+            </div>
+            <div class="ap-fg">
+              <label>MRP / Price (₹)</label>
+              <input type="text" id="apProdPrice" placeholder="e.g. 1999">
+            </div>
+            <div class="ap-fg">
+              <label>Category</label>
+              <select id="apProdCat">
+                <option value="Home Appliances">Home Appliances</option>
+                <option value="Kitchenware">Kitchenware</option>
+                <option value="Crockery & Dining">Crockery &amp; Dining</option>
+                <option value="Pooja & Devotional">Pooja &amp; Devotional</option>
+                <option value="Home Essentials">Home Essentials</option>
+                <option value="Electrical & Lighting">Electrical &amp; Lighting</option>
+                <option value="Gas Stoves & Hobs">Gas Stoves &amp; Hobs</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- imgbb API Key Setup -->
+          <div class="ap-api-box">
+            <label>🔑 Image Storage API Key (imgbb)</label>
+            <div class="ap-api-row">
+              <input type="password" id="apApiKey" placeholder="Paste your API key here">
+              <button class="ap-api-save" onclick="apSaveConfig()">Save Key</button>
+            </div>
+            <div class="ap-api-status warn" id="apConfigStatus">⚠ Not connected — paste API key above</div>
+          </div>
+
+          <div class="ap-dual-dz">
+            <!-- Product Image Dropzone -->
+            <div class="ap-dz-wrap">
+              <span class="ap-dz-badge required">★ Product Image (Required)</span>
+              <div class="ap-dropzone" id="apDropzone" onclick="document.getElementById('apFileInput').click()" style="padding: 20px;">
+                <i class="fas fa-image" style="font-size: 1.8rem; margin-bottom: 6px;"></i>
+                <p style="font-size: 0.8rem;"><span>Click to browse</span> or drag &amp; drop</p>
+              </div>
+              <input type="file" id="apFileInput" accept="image/*">
+              <div class="ap-previews" id="apPreviews" style="margin-top: 8px;"></div>
+            </div>
+
+            <!-- Description Image Dropzone -->
+            <div class="ap-dz-wrap">
+              <span class="ap-dz-badge optional">✦ Description / Spec (Optional)</span>
+              <div class="ap-dropzone" id="apDescDropzone" onclick="document.getElementById('apDescFileInput').click()" style="padding: 20px;">
+                <i class="fas fa-file-invoice" style="font-size: 1.8rem; color: #f59e0b; margin-bottom: 6px;"></i>
+                <p style="font-size: 0.8rem;"><span style="color: #f59e0b;">Click to browse</span> or drag &amp; drop</p>
+              </div>
+              <input type="file" id="apDescFileInput" accept="image/*">
+              <div class="ap-previews" id="apDescPreviews" style="margin-top: 8px;"></div>
+            </div>
+          </div>
+          <div class="ap-prog-wrap" id="apProgWrap"><div class="ap-prog-bar" id="apProgBar"></div></div>
+
+          <div class="ap-actions">
+            <button class="ap-btn-up" id="apUploadBtn" onclick="apUpload()" disabled>
+              <i class="fas fa-cloud-upload-alt"></i> Upload to Cloud
+            </button>
+            <button class="ap-btn-logout" onclick="apLogout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+          </div>
+        </div>
+
+        <!-- Uploaded Products -->
+        <div class="ap-section">
+          <h3><i class="fas fa-layer-group"></i> Uploaded Products</h3>
+          <p>These images are live on the website. Delete to remove from the catalog.</p>
+          <div class="ap-grid" id="apGrid"><div class="ap-empty"><i class="fas fa-box-open"></i>No uploads yet</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Edit Modal (for Admin) -->
+<div id="quickEditOverlay">
+  <div class="qe-card">
+    <button onclick="closeQuickEdit()" style="position:absolute;top:14px;right:14px;background:none;border:none;font-size:1.2rem;cursor:pointer;color:#999;"><i class="fas fa-times"></i></button>
+    <h3 style="margin:0 0 16px 0;color:#ad1f35;font-size:1.15rem;font-weight:800;display:flex;align-items:center;gap:8px;"><i class="fas fa-edit"></i> Edit Product</h3>
+    <input type="hidden" id="qeIndex">
+    <!-- Dual image slots for Quick Edit -->
+    <div class="qe-imgs-row">
+      <!-- Product Image Box -->
+      <div class="qe-img-box" onclick="document.getElementById('qeFileInput').click()">
+        <span class="qe-img-badge set" id="qeProdBadge">Set</span>
+        <img id="qeImg" src="" alt="Product">
+        <div class="qe-img-label">Product Image</div>
+      </div>
+      <input type="file" id="qeFileInput" accept="image/*" style="display:none;">
+
+      <!-- Description Image Box -->
+      <div class="qe-img-box" onclick="document.getElementById('qeDescFileInput').click()">
+        <span class="qe-img-badge missing" id="qeDescBadge">None</span>
+        <img id="qeDescImg" src="" alt="Description" style="background: #fafafa; border: 1px dashed #cbd5e1;">
+        <div class="qe-img-label">Description / Spec</div>
+      </div>
+      <input type="file" id="qeDescFileInput" accept="image/*" style="display:none;">
+    </div>
+    
+    <!-- Uploading / Status indicator -->
+    <div class="qe-uploading" id="qeUploading">
+      <i class="fas fa-spinner fa-spin"></i> Uploading to cloud...
+    </div>
+    <div style="margin-bottom:12px;">
+      <label style="display:block;font-size:0.7rem;color:#7a8099;margin-bottom:4px;text-transform:uppercase;font-weight:700;">Product Name</label>
+      <input type="text" id="qeName" style="width:100%;padding:8px 12px;border:1px solid #dcdfe6;border-radius:6px;font-size:0.85rem;outline:none;font-family:'Outfit',sans-serif;">
+    </div>
+    <div style="margin-bottom:12px;">
+      <label style="display:block;font-size:0.7rem;color:#7a8099;margin-bottom:4px;text-transform:uppercase;font-weight:700;">MRP / Price (₹)</label>
+      <input type="text" id="qePrice" style="width:100%;padding:8px 12px;border:1px solid #dcdfe6;border-radius:6px;font-size:0.85rem;outline:none;font-family:'Outfit',sans-serif;">
+    </div>
+    <div style="margin-bottom:20px;">
+      <label style="display:block;font-size:0.7rem;color:#7a8099;margin-bottom:4px;text-transform:uppercase;font-weight:700;">Category</label>
+      <select id="qeCat" style="width:100%;padding:8px;border:1px solid #dcdfe6;border-radius:6px;font-size:0.85rem;outline:none;cursor:pointer;font-family:'Outfit',sans-serif;">
+        <option value="Home Appliances">Home Appliances</option>
+        <option value="Kitchenware">Kitchenware</option>
+        <option value="Crockery & Dining">Crockery &amp; Dining</option>
+        <option value="Pooja & Devotional">Pooja &amp; Devotional</option>
+        <option value="Home Essentials">Home Essentials</option>
+        <option value="Electrical & Lighting">Electrical &amp; Lighting</option>
+        <option value="Gas Stoves & Hobs">Gas Stoves &amp; Hobs</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button onclick="saveQuickEdit()" style="flex:1;padding:10px;background:#ad1f35;color:#fff;border:none;border-radius:6px;font-weight:700;font-size:0.85rem;cursor:pointer;transition:0.2s;font-family:'Outfit',sans-serif;">Save Changes</button>
+      <button onclick="deleteQuickEdit()" style="padding:10px;background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.2);border-radius:6px;font-weight:700;font-size:0.85rem;cursor:pointer;display:flex;align-items:center;gap:6px;font-family:'Outfit',sans-serif;"><i class="fas fa-trash"></i> Remove</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="apToast"><i class="fas fa-circle-check"></i><span id="apToastMsg"></span></div>
+
+<script>
+// ── SIGN IN SYSTEM ────────────────────────────────────────────────────
+const ADMIN_EMAIL = 'peekeymetalsulikkal@gmail.com';
+const ADMIN_PASS  = 'peekey123';
+
+function openSignIn(){
+  const loggedIn = sessionStorage.getItem('pk_user_email');
+  document.getElementById('siForm').style.display     = loggedIn ? 'none' : 'block';
+  document.getElementById('siLoggedIn').style.display = loggedIn ? 'block' : 'none';
+  if(loggedIn) populateUserUI(loggedIn);
+  document.getElementById('signInOverlay').classList.add('open');
+}
+function closeSignIn(){ document.getElementById('signInOverlay').classList.remove('open'); }
+
+function doSignIn(){
+  const email = document.getElementById('siEmail').value.trim().toLowerCase();
+  const pass  = document.getElementById('siPass').value;
+  if(email === ADMIN_EMAIL && pass === ADMIN_PASS){
+    sessionStorage.setItem('pk_user_email', email);
+    document.getElementById('siErr').style.display='none';
+    populateUserUI(email);
+    document.getElementById('siForm').style.display='none';
+    document.getElementById('siLoggedIn').style.display='block';
+    updateNavUser(email);
+    checkAdminAccess(email);
+    window.dispatchEvent(new CustomEvent('pk_auth_changed'));
+    apToast && apToast('Signed in as admin!','ok');
+  } else {
+    document.getElementById('siErr').style.display='block';
+  }
+}
+
+function doGoogleSignIn(){
+  if(!firebaseReady){
+    document.getElementById('googleNote').style.display='block';
+    return;
+  }
+  const provider = new firebase.auth.GoogleAuthProvider();
+  firebase.auth().signInWithPopup(provider)
+    .then(result => {
+      const email = result.user.email.toLowerCase();
+      const name  = result.user.displayName || email.split('@')[0];
+      const photo = result.user.photoURL || '';
+      sessionStorage.setItem('pk_user_email', email);
+      sessionStorage.setItem('pk_user_name', name);
+      sessionStorage.setItem('pk_user_photo', photo);
+      // Show logged-in state
+      document.getElementById('siAvatar').innerHTML = photo
+        ? `<img src="${photo}" style="width:44px;height:44px;border-radius:50%;object-fit:cover">`
+        : email[0].toUpperCase();
+      document.getElementById('siName').textContent = name;
+      document.getElementById('siEmailDisplay').textContent = email;
+      const isAdmin = email === ADMIN_EMAIL;
+      document.getElementById('siAdminBadge').style.display = isAdmin ? 'block' : 'none';
+      document.getElementById('siForm').style.display='none';
+      document.getElementById('siLoggedIn').style.display='block';
+      updateNavUser(email, name, photo);
+      checkAdminAccess(email);
+      window.dispatchEvent(new CustomEvent('pk_auth_changed'));
+      closeSignIn();
+      apToast && apToast(isAdmin ? '✅ Signed in as Admin!' : '✅ Signed in with Google!','ok');
+    })
+    .catch(err => {
+      apToast && apToast('Google sign-in failed: ' + err.message,'err');
+    });
+}
+
+function openTrackOrder() {
+  const desktopTrack = Array.from(document.querySelectorAll('.ts-action-item')).find(el => el.innerText.toLowerCase().includes('track order'));
+  if (desktopTrack) {
+    desktopTrack.click();
+  } else {
+    const trackModal = document.getElementById('track-order-modal');
+    if (trackModal) trackModal.classList.add('active');
+  }
+}
+
+function handleMobUserClick() {
+  const email = sessionStorage.getItem('pk_user_email');
+  if (email === ADMIN_EMAIL) {
+    openAdmin();
+  } else {
+    openSignIn();
+  }
+}
+
+function updateMobUserTab() {
+  const email = sessionStorage.getItem('pk_user_email');
+  const textEl = document.getElementById('mobUserText');
+  const iconEl = document.getElementById('mobUserIcon');
+  const tabEl = document.getElementById('mobUserTab');
+  if (!textEl || !iconEl) return;
+
+  if (email === ADMIN_EMAIL) {
+    textEl.textContent = 'Admin';
+    iconEl.className = 'fas fa-shield-alt';
+    if (tabEl) tabEl.style.setProperty('color', '#ad1f35', 'important');
+  } else if (email) {
+    textEl.textContent = 'Profile';
+    iconEl.className = 'fas fa-circle-user';
+    if (tabEl) tabEl.style.setProperty('color', '', '');
+  } else {
+    textEl.textContent = 'Sign In';
+    iconEl.className = 'far fa-user';
+    if (tabEl) tabEl.style.setProperty('color', '', '');
+  }
+}
+
+function doSignOut(){
+  sessionStorage.removeItem('pk_user_email');
+  sessionStorage.removeItem('pk_user_name');
+  sessionStorage.removeItem('pk_user_photo');
+  sessionStorage.removeItem('pk_admin');
+  closeSignIn();
+  // Hide admin buttons
+  document.getElementById('adminFloatBtn').style.setProperty('display', 'none', 'important');
+  document.getElementById('signinBtn').style.display='flex';
+  document.getElementById('userBtn').style.display='none';
+  const sidebarUserText = document.getElementById('sidebarUserText');
+  if(sidebarUserText) sidebarUserText.textContent = 'Sign In';
+  updateMobUserTab();
+  location.reload();
+}
+
+function populateUserUI(email, name, photo){
+  const initial = email[0].toUpperCase();
+  document.getElementById('siAvatar').innerHTML = photo
+    ? `<img src="${photo}" style="width:44px;height:44px;border-radius:50%;object-fit:cover">`
+    : initial;
+  document.getElementById('siName').textContent = name || email.split('@')[0];
+  document.getElementById('siEmailDisplay').textContent = email;
+  const isAdmin = email === ADMIN_EMAIL;
+  document.getElementById('siAdminBadge').style.display = isAdmin ? 'block' : 'none';
+}
+
+function updateNavUser(email, name, photo){
+  document.getElementById('signinBtn').style.display='none';
+  const ub = document.getElementById('userBtn');
+  ub.style.display='flex';
+  document.getElementById('userAvatar').innerHTML = photo
+    ? `<img src="${photo}" style="width:32px;height:32px;border-radius:50%;object-fit:cover">`
+    : email[0].toUpperCase();
+  document.getElementById('userNameLabel').textContent = name || email.split('@')[0];
+  const sidebarUserText = document.getElementById('sidebarUserText');
+  if(sidebarUserText) sidebarUserText.textContent = name || email.split('@')[0];
+  updateMobUserTab();
+}
+
+function checkAdminAccess(email){
+  if(email === ADMIN_EMAIL){
+    sessionStorage.setItem('pk_admin','1');
+    document.getElementById('adminFloatBtn').style.setProperty('display', 'flex', 'important');
+  } else {
+    sessionStorage.removeItem('pk_admin');
+    document.getElementById('adminFloatBtn').style.setProperty('display', 'none', 'important');
+  }
+  updateMobUserTab();
+}
+
+// Restore session on page load
+(function initSession(){
+  const email = sessionStorage.getItem('pk_user_email');
+  const name  = sessionStorage.getItem('pk_user_name');
+  const photo = sessionStorage.getItem('pk_user_photo');
+  if(email){ updateNavUser(email, name, photo); checkAdminAccess(email); }
+  else { updateMobUserTab(); }
+})();
+
+// Close on outside click
+document.getElementById('signInOverlay').addEventListener('click', e=>{ if(e.target===e.currentTarget) closeSignIn(); });
+// ─────────────────────────────────────────────────────────────────────
+</script>
+
+<script>
+(function(){
+  const PASS   = 'peekey@admin2024';
+  const SK     = 'peekey_products_v2';
+  const API_KEY_SK = 'pk_imgbb_key';
+
+  // ── Open/Close ────────────────────────────────────────────
+  window.openAdmin = function(){
+    document.getElementById('adminOverlay').classList.add('open');
+    if(sessionStorage.getItem('pk_admin')){showApDash();}
+    else{document.getElementById('apLogin').style.display='block';document.getElementById('apDash').style.display='none';}
+  };
+  window.closeAdmin = function(){document.getElementById('adminOverlay').classList.remove('open');};
+
+  // Secret shortcut: Ctrl + Shift + A
+  document.addEventListener('keydown', e=>{
+    if(e.ctrlKey && e.shiftKey && e.key==='A'){e.preventDefault();openAdmin();}
+  });
+
+  // ── Auto-Detect Category ──────────────────────────────────
+  const AP_CAT_KEYWORDS = {
+    'Home Appliances': ['mixer','grinder','juicer','rice cooker','air fryer','toaster','sandwich','water heater','exhaust fan','purifier','iron','blender','oven','microwave','induction','cooktop','fan','heater'],
+    'Kitchenware': ['cooker','pressure','pan','tawa','wok','kadai','pot','cookware','saucepan','stockpot','milk boiler','appam','dosa','cast iron','triply','non-stick','knife','knives','chopping','board','grater','mortar','pestle','spoon','spatula','ladle','brass utensil','brass bottle'],
+    'Crockery & Dining': ['plate','bowl','mug','cup','glass','jug','tray','cutlery','fork','spoon set','dessert','cake stand','serving','dinner set','ceramic','porcelain'],
+    'Pooja & Devotional': ['vilakku','nilavilakku','lamp','pooja','thali','kalash','panchapathram','bell','incense','diya','agarbatti','brass bell'],
+    'Home Essentials': ['bucket','bottle','flask','lunch box','storage','jar','container','chair','rack','shelf','dustbin','laundry','basket','shoe rack','cleaning','brush','mop','broom','water bottle','steel bottle','vacuum'],
+    'Electrical & Lighting': ['bulb','led','tube','switch','wire','plug','socket','holder','extension','torch','lamp','battery','cables','adapter','light'],
+    'Gas Stoves & Hobs': ['stove','gas','hob','burner','regulator','pipe','lighter']
+  };
+
+  window.apAutoDetectCat = function(name) {
+    const val = name.toLowerCase().trim();
+    const badge = document.getElementById('apAutoDetect');
+    const select = document.getElementById('apProdCat');
+    if (!val) {
+      badge.style.display = 'none';
+      return;
+    }
+    let detected = null;
+    for (const [cat, kws] of Object.entries(AP_CAT_KEYWORDS)) {
+      if (kws.some(kw => val.includes(kw))) {
+        detected = cat;
+        break;
+      }
+    }
+    if (detected) {
+      select.value = detected;
+      badge.style.display = 'block';
+    } else {
+      badge.style.display = 'none';
+    }
+  };
+
+  // ── Auth ──────────────────────────────────────────────────
+  window.apDoLogin = function(){
+    const email = sessionStorage.getItem('pk_user_email');
+    if (email === ADMIN_EMAIL) {
+      sessionStorage.setItem('pk_admin','1');
+      showApDash();
+    } else {
+      closeAdmin();
+      openSignIn();
+    }
+  };
+  window.apLogout = function(){
+    sessionStorage.removeItem('pk_admin');
+    doSignOut();
+    closeAdmin();
+  };
+
+  function showApDash(){
+    document.getElementById('apLogin').style.display='none';
+    document.getElementById('apDash').style.display='block';
+    const key = localStorage.getItem(API_KEY_SK)||'';
+    document.getElementById('apApiKey').value = key;
+    const st = document.getElementById('apConfigStatus');
+    if(key){ st.textContent='✅ Connected — ready to upload!'; st.className='ap-api-status ok'; }
+    else { st.textContent='⚠ Not connected — paste API key above'; st.className='ap-api-status warn'; }
+    renderApGrid();
+    updateApStats();
+  }
+
+  // ── Config ────────────────────────────────────────────────
+  window.apSaveConfig = function(){
+    const key = document.getElementById('apApiKey').value.trim();
+    if(!key){apToast('Paste your imgbb API key!','err');return;}
+    localStorage.setItem(API_KEY_SK, key);
+    const st = document.getElementById('apConfigStatus');
+    st.textContent='✅ Connected — ready to upload!'; st.className='ap-api-status ok';
+    apToast('API key saved! You can now upload images.','ok');
+  };
+
+  // ── Files ─────────────────────────────────────────────────
+  let selFiles = [];
+  let selDescFile = null; // Description/spec file for new upload
+
+  // Primary Dropzone
+  const dz = document.getElementById('apDropzone');
+  const fi = document.getElementById('apFileInput');
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('over'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('over'));
+  dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('over'); addFiles([...e.dataTransfer.files]); });
+  fi.addEventListener('change', () => { addFiles([...fi.files]); fi.value = ''; });
+
+  // Description Dropzone
+  const ddz = document.getElementById('apDescDropzone');
+  const dfi = document.getElementById('apDescFileInput');
+  ddz.addEventListener('dragover', e => { e.preventDefault(); ddz.classList.add('over'); });
+  ddz.addEventListener('dragleave', () => ddz.classList.remove('over'));
+  ddz.addEventListener('drop', e => { e.preventDefault(); ddz.classList.remove('over'); addDescFile(e.dataTransfer.files[0]); });
+  dfi.addEventListener('change', () => { if (dfi.files[0]) addDescFile(dfi.files[0]); dfi.value = ''; });
+
+  function addFiles(files) {
+    selFiles = [...selFiles, ...files.filter(f => f.type.startsWith('image/'))];
+    renderPreviews();
+    document.getElementById('apUploadBtn').disabled = selFiles.length === 0;
+  }
+  function renderPreviews() {
+    const strip = document.getElementById('apPreviews');
+    strip.innerHTML = selFiles.map((f, i) => `
+      <div class="ap-prev-item">
+        <img src="${URL.createObjectURL(f)}">
+        <button class="ap-prev-remove" onclick="apRemoveFile(${i})"><i class="fas fa-xmark"></i></button>
+      </div>`).join('');
+  }
+  window.apRemoveFile = function (i) {
+    selFiles.splice(i, 1);
+    renderPreviews();
+    document.getElementById('apUploadBtn').disabled = selFiles.length === 0;
+  };
+
+  function addDescFile(f) {
+    if (!f || !f.type.startsWith('image/')) return;
+    selDescFile = f;
+    renderDescPreview();
+  }
+  function renderDescPreview() {
+    const strip = document.getElementById('apDescPreviews');
+    if (!selDescFile) { strip.innerHTML = ''; return; }
+    strip.innerHTML = `
+      <div class="ap-prev-item">
+        <img src="${URL.createObjectURL(selDescFile)}">
+        <button class="ap-prev-remove" onclick="apRemoveDescFile()"><i class="fas fa-xmark"></i></button>
+      </div>`;
+  }
+  window.apRemoveDescFile = function () {
+    selDescFile = null;
+    renderDescPreview();
+  };
+
+  // ── Upload via imgbb ───────────────────────────────────────
+  window.apUpload = async function(){
+    const name  = document.getElementById('apProdName').value.trim();
+    const price = document.getElementById('apProdPrice').value.trim();
+    const cat   = document.getElementById('apProdCat').value;
+    const useDefault = localStorage.getItem('pk_use_default_key') !== 'false';
+    const key = useDefault ? 'f8c12c3f56c637bbf020ca4ddaedc221' : (localStorage.getItem(API_KEY_SK)||'');
+    if(!name){apToast('Enter a product name!','err');return;}
+    if(!key){apToast('⚠ Paste your imgbb API key first!','err');document.getElementById('apApiKey').focus();return;}
+    if(!selFiles.length){apToast('Select at least one image!','err');return;}
+
+    const btn=document.getElementById('apUploadBtn');
+    const pw=document.getElementById('apProgWrap');
+    const pb=document.getElementById('apProgBar');
+    btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Uploading...';
+    pw.style.display='block';
+
+    const products=getProducts();
+    let done=0;
+
+    // First upload description file if selected
+    let descUrl = '';
+    if (selDescFile) {
+      try {
+        const db64 = await new Promise((r,j)=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.onerror=j;fr.readAsDataURL(selDescFile);});
+        const dfd = new FormData();
+        dfd.append('key', key);
+        dfd.append('image', db64.split(',')[1]);
+        dfd.append('name', 'desc-' + name.replace(/\s+/g,'-'));
+        const dres = await fetch('https://api.imgbb.com/1/upload', {method:'POST', body:dfd});
+        const ddata = await dres.json();
+        if (ddata.success && ddata.data?.url) {
+          descUrl = ddata.data.display_url || ddata.data.url;
+        }
+      } catch(e) { console.error("Error uploading description image", e); }
+    }
+
+    const uploadedUrls = [];
+    for(const file of selFiles){
+      try{
+        const b64 = await new Promise((r,j)=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.onerror=j;fr.readAsDataURL(file);});
+        const fd=new FormData();
+        fd.append('key',key);
+        fd.append('image',b64.split(',')[1]);
+        fd.append('name',name.replace(/\s+/g,'-'));
+        const res=await fetch('https://api.imgbb.com/1/upload',{method:'POST',body:fd});
+        const data=await res.json();
+        if(data.success && data.data?.url){
+          // Prefer display_url (direct CDN link), fall back to url
+          const imgUrl = data.data.display_url || data.data.medium?.url || data.data.url;
+          uploadedUrls.push(imgUrl);
+        } else { apToast('Error: '+(data.error?.message||'Check API key'),'err'); }
+      }catch(e){apToast('Network error during upload','err');}
+      done++;
+      pb.style.width=Math.round(done/selFiles.length*100)+'%';
+    }
+
+    if (uploadedUrls.length > 0) {
+      let p = products.find(prod => prod.name && prod.name.toLowerCase().trim() === name.toLowerCase().trim());
+      if (!p) {
+        p = {
+          id: 'prod-' + Date.now(),
+          name,
+          price,
+          category: cat,
+          url: '',
+          at: Date.now()
+        };
+        products.push(p);
+      } else {
+        if (price) p.price = price;
+        if (cat) p.category = cat;
+      }
+
+      if (descUrl) p.descUrl = descUrl;
+
+      // Assign uploaded URLs to slots
+      if (uploadedUrls.length > 1) {
+        p.url = uploadedUrls[0] || p.url;
+        p.img1 = uploadedUrls[1] || p.img1;
+        p.img2 = uploadedUrls[2] || p.img2;
+      } else if (uploadedUrls.length === 1) {
+        const isLocalOrEmpty = (src) => !src || (!src.startsWith('http') && !src.startsWith('data:'));
+        if (isLocalOrEmpty(p.url)) {
+          p.url = uploadedUrls[0];
+        } else if (isLocalOrEmpty(p.img1)) {
+          p.img1 = uploadedUrls[0];
+        } else if (isLocalOrEmpty(p.img2)) {
+          p.img2 = uploadedUrls[0];
+        } else {
+          p.url = uploadedUrls[0];
+        }
+      }
+    }
+    saveProducts(products);
+    selFiles=[];
+    selDescFile=null;
+    renderPreviews();
+    renderDescPreview();
+    document.getElementById('apProdName').value='';
+    document.getElementById('apProdPrice').value='';
+    btn.disabled=false;btn.innerHTML='<i class="fas fa-cloud-upload-alt"></i> Upload to Cloud';
+    pw.style.display='none';pb.style.width='0%';
+    apToast(`✅ ${done} image(s) uploaded — now live on site!`,'ok');
+    renderApGrid();updateApStats();
+  };
+
+
+
+  // ── Grid ──────────────────────────────────────────────────
+  function renderApGrid(){
+    const products=getProducts();
+    const grid=document.getElementById('apGrid');
+    if(!products.length){
+      grid.innerHTML='<div class="ap-empty"><i class="fas fa-box-open"></i>No uploads yet</div>';
+      return;
+    }
+    grid.innerHTML=products.map((p,i)=>`
+      <div class="ap-card" style="background:#111522;border:1px solid #2a2f42;border-radius:10px;overflow:hidden;padding:10px;">
+        <img src="${p.url}" alt="${p.name}" style="width:100%;height:80px;object-fit:cover;border-radius:6px;margin-bottom:8px;"
+          onerror="this.onerror=null;this.style.objectFit='contain';this.style.background='#1e2435';this.style.padding='10px';this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'60\\' height=\\'60\\' viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'%234a5568\\' stroke-width=\\'1.5\\'><rect x=\\'3\\' y=\\'3\\' width=\\'18\\' height=\\'18\\' rx=\\'2\\'/><circle cx=\\'8.5\\' cy=\\'8.5\\' r=\\'1.5\\'/><polyline points=\\'21 15 16 10 5 21\\'/></svg>'">
+        <div class="ap-card-body" style="padding:0;">
+          <div style="font-size:0.65rem;color:#7a8099;margin-bottom:2px;text-transform:uppercase;font-weight:600;">Product Name</div>
+          <input type="text" value="${p.name}" onchange="apUpdateItem(${i}, 'name', this.value)" style="width:100%;background:#161b27;border:1px solid #2a2f42;color:#fff;border-radius:4px;padding:4px 6px;font-size:0.75rem;font-family:'Outfit',sans-serif;margin-bottom:6px;outline:none;">
+          
+          <div style="font-size:0.65rem;color:#7a8099;margin-bottom:2px;text-transform:uppercase;font-weight:600;">MRP / Price (₹)</div>
+          <input type="text" value="${p.price || ''}" placeholder="e.g. 1999" onchange="apUpdateItem(${i}, 'price', this.value)" style="width:100%;background:#161b27;border:1px solid #2a2f42;color:#fff;border-radius:4px;padding:4px 6px;font-size:0.75rem;font-family:'Outfit',sans-serif;margin-bottom:6px;outline:none;">
+          
+          <div style="font-size:0.65rem;color:#7a8099;margin-bottom:2px;text-transform:uppercase;font-weight:600;">Category</div>
+          <select onchange="apUpdateItem(${i}, 'category', this.value)" style="width:100%;background:#161b27;border:1px solid #2a2f42;color:#fff;border-radius:4px;padding:4px;font-size:0.7rem;font-family:'Outfit',sans-serif;margin-bottom:10px;outline:none;cursor:pointer;">
+            <option value="Home Appliances" ${p.category==='Home Appliances'?'selected':''}>Home Appliances</option>
+            <option value="Kitchenware" ${p.category==='Kitchenware'?'selected':''}>Kitchenware</option>
+            <option value="Crockery & Dining" ${p.category==='Crockery & Dining'?'selected':''}>Crockery & Dining</option>
+            <option value="Pooja & Devotional" ${p.category==='Pooja & Devotional'?'selected':''}>Pooja & Devotional</option>
+            <option value="Home Essentials" ${p.category==='Home Essentials'?'selected':''}>Home Essentials</option>
+            <option value="Electrical & Lighting" ${p.category==='Electrical & Lighting'?'selected':''}>Electrical & Lighting</option>
+            <option value="Gas Stoves & Hobs" ${p.category==='Gas Stoves & Hobs'?'selected':''}>Gas Stoves & Hobs</option>
+          </select>
+          
+          <button class="ap-btn-del" onclick="apDelete(${i})" style="width:100%;padding:6px;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.25);border-radius:6px;color:#ef4444;font-size:0.7rem;cursor:pointer;transition:0.2s;"><i class="fas fa-trash"></i> Remove</button>
+        </div>
+      </div>`).join('');
+  }
+
+  window.apUpdateItem = function(index, field, value){
+    const products = getProducts();
+    if(products[index]){
+      products[index][field] = value;
+      saveProducts(products);
+      apToast('Product updated!','ok');
+      updateApStats();
+    }
+  };
+
+  window.apDelete=function(i){
+    if(!confirm('Remove this product from the website?'))return;
+    const products=getProducts();
+    products.splice(i,1);
+    saveProducts(products);
+    apToast('Product removed','ok');
+    renderApGrid();updateApStats();
+  };
+
+  function updateApStats(){
+    const products=getProducts();
+    document.getElementById('apStatTotal').textContent=products.length;
+    document.getElementById('apStatCats').textContent=new Set(products.map(p=>p.category)).size;
+    const weekAgo=Date.now()-7*24*60*60*1000;
+    document.getElementById('apStatNew').textContent=products.filter(p=>p.at>weekAgo).length;
+  }
+
+  // ── Storage ───────────────────────────────────────────────
+  function getProducts(){try{return JSON.parse(localStorage.getItem(SK)||'[]');}catch{return [];}}
+  function saveProducts(arr){
+    localStorage.setItem(SK,JSON.stringify(arr));
+    window.dispatchEvent(new CustomEvent('pk_products_updated'));
+    window.dispatchEvent(new StorageEvent('storage',{key:SK}));
+  }
+
+
+
+  // ── Toast ─────────────────────────────────────────────────
+  window.apToast=function(msg,type='ok'){
+    const t=document.getElementById('apToast');
+    const icon=t.querySelector('i');
+    document.getElementById('apToastMsg').textContent=msg;
+    t.className='show '+type;
+    icon.className=type==='ok'?'fas fa-circle-check':'fas fa-circle-xmark';
+    setTimeout(()=>t.className='',3500);
+  };
+
+  // ── Quick Edit Modal ───────────────────────────────────────
+  let qeNewProdFile = null;
+  let qeNewDescFile = null;
+
+  // File pickers within the modal
+  const qefi = document.getElementById('qeFileInput');
+  const qedfi = document.getElementById('qeDescFileInput');
+
+  qefi.addEventListener('change', () => {
+    const f = qefi.files[0];
+    if (f && f.type.startsWith('image/')) {
+      qeNewProdFile = f;
+      document.getElementById('qeImg').src = URL.createObjectURL(f);
+      const badge = document.getElementById('qeProdBadge');
+      badge.textContent = 'New';
+      badge.className = 'qe-img-badge set';
+    }
+    qefi.value = '';
+  });
+
+  qedfi.addEventListener('change', () => {
+    const f = qedfi.files[0];
+    if (f && f.type.startsWith('image/')) {
+      qeNewDescFile = f;
+      document.getElementById('qeDescImg').src = URL.createObjectURL(f);
+      const badge = document.getElementById('qeDescBadge');
+      badge.textContent = 'New';
+      badge.className = 'qe-img-badge set';
+    }
+    qedfi.value = '';
+  });
+
+  window.openQuickEdit = function(index) {
+    const products = getProducts();
+    const p = products[index];
+    if(!p) return;
+    
+    // Clear temporary uploads
+    qeNewProdFile = null;
+    qeNewDescFile = null;
+    document.getElementById('qeUploading').style.display = 'none';
+
+    document.getElementById('qeIndex').value = index;
+    document.getElementById('qeImg').src = p.url || '';
+    
+    const descImg = document.getElementById('qeDescImg');
+    const descBadge = document.getElementById('qeDescBadge');
+    if (p.descUrl) {
+      descImg.src = p.descUrl;
+      descBadge.textContent = 'Set';
+      descBadge.className = 'qe-img-badge set';
+    } else {
+      descImg.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="%23cbd5e1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>';
+      descBadge.textContent = 'None';
+      descBadge.className = 'qe-img-badge missing';
+    }
+    
+    document.getElementById('qeProdBadge').textContent = 'Set';
+    document.getElementById('qeProdBadge').className = 'qe-img-badge set';
+
+    document.getElementById('qeName').value = p.name;
+    document.getElementById('qePrice').value = p.price || '';
+    document.getElementById('qeCat').value = p.category;
+    document.getElementById('quickEditOverlay').style.display = 'flex';
+  };
+
+  window.closeQuickEdit = function() {
+    document.getElementById('quickEditOverlay').style.display = 'none';
+  };
+
+  window.saveQuickEdit = async function() {
+    const idx = parseInt(document.getElementById('qeIndex').value);
+    const products = getProducts();
+    const p = products[idx];
+    if(!p) return;
+
+    const key = localStorage.getItem(API_KEY_SK)||'';
+    const nameVal = document.getElementById('qeName').value.trim();
+    if(!nameVal) { apToast('Product name cannot be empty!','err'); return; }
+
+    // If custom image files are selected, we must upload them first!
+    const upIndicator = document.getElementById('qeUploading');
+    const saveBtn = document.querySelector('#quickEditOverlay button[onclick="saveQuickEdit()"]');
+    
+    if (qeNewProdFile || qeNewDescFile) {
+      if(!key) {
+        apToast('Paste your imgbb API key in the admin panel first!','err');
+        return;
+      }
+      upIndicator.style.display = 'flex';
+      if(saveBtn) saveBtn.disabled = true;
+
+      // Upload product image if changed
+      if (qeNewProdFile) {
+        try {
+          const b64 = await new Promise((r,j)=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.onerror=j;fr.readAsDataURL(qeNewProdFile);});
+          const fd = new FormData();
+          fd.append('key', key);
+          fd.append('image', b64.split(',')[1]);
+          fd.append('name', nameVal.replace(/\s+/g,'-'));
+          const res = await fetch('https://api.imgbb.com/1/upload', {method:'POST', body:fd});
+          const data = await res.json();
+          if (data.success && data.data?.url) {
+            // Use the highest-quality direct URL from imgbb
+            p.url = data.data.display_url || data.data.medium?.url || data.data.url;
+          }
+        } catch(e) { apToast('Error uploading new product image', 'err'); }
+      }
+
+      // Upload description image if changed
+      if (qeNewDescFile) {
+        try {
+          const b64 = await new Promise((r,j)=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.onerror=j;fr.readAsDataURL(qeNewDescFile);});
+          const fd = new FormData();
+          fd.append('key', key);
+          fd.append('image', b64.split(',')[1]);
+          fd.append('name', 'desc-' + nameVal.replace(/\s+/g,'-'));
+          const res = await fetch('https://api.imgbb.com/1/upload', {method:'POST', body:fd});
+          const data = await res.json();
+          if (data.success && data.data?.url) {
+            p.descUrl = data.data.display_url || data.data.medium?.url || data.data.url;
+          }
+        } catch(e) { apToast('Error uploading new description image', 'err'); }
+      }
+    }
+
+    p.name = nameVal;
+    p.price = document.getElementById('qePrice').value.trim();
+    p.category = document.getElementById('qeCat').value;
+    
+    saveProducts(products);
+    apToast('Product updated successfully!','ok');
+    
+    // Refresh admin display & close
+    renderApGrid();
+    updateApStats();
+    if(saveBtn) saveBtn.disabled = false;
+    upIndicator.style.display = 'none';
+    closeQuickEdit();
+  };
+
+  window.deleteQuickEdit = function() {
+    const idx = parseInt(document.getElementById('qeIndex').value);
+    if(confirm('Remove this product from the website?')) {
+      const products = getProducts();
+      products.splice(idx, 1);
+      saveProducts(products);
+      apToast('Product removed','ok');
+      renderApGrid();
+      updateApStats();
+      closeQuickEdit();
+    }
+  };
+
+  // Close on overlay click
+  document.getElementById('adminOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeAdmin();});
+  document.getElementById('quickEditOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeQuickEdit();});
+})();
+</script>
+
+<!-- Mobile Bottom Navigation Bar -->
+<div class="mobile-bottom-nav" id="mobileBottomNav">
+    <a href="index.html" class="mob-nav-item active">
+        <i class="fas fa-home"></i>
+        <span>Home</span>
+    </a>
+    <a href="#catalog" class="mob-nav-item">
+        <i class="fas fa-th-large"></i>
+        <span>Categories</span>
+    </a>
+    <a href="#" class="mob-nav-item mob-wishlist-btn">
+        <div class="nav-icon-wrapper">
+            <i class="far fa-heart"></i>
+            <span class="badge" id="mob-wishlist-badge">0</span>
+        </div>
+        <span>Wishlist</span>
+    </a>
+    <a href="#" class="mob-nav-item mob-cart-btn">
+        <div class="nav-icon-wrapper">
+            <i class="fas fa-shopping-cart"></i>
+            <span class="badge" id="mob-cart-badge">0</span>
+        </div>
+        <span>Cart</span>
+    </a>
+    <!-- Dynamic User/Admin Tab -->
+    <a href="#" class="mob-nav-item" id="mobUserTab" onclick="event.preventDefault(); handleMobUserClick();">
+        <i class="far fa-user" id="mobUserIcon"></i>
+        <span id="mobUserText">Sign In</span>
+    </a>
+</div>
+
+<!-- Mobile UI Event Binding -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Hamburger Menu click
+    const mobHamburger = document.getElementById('mobileHamburgerBtn');
+    if (mobHamburger) {
+        mobHamburger.addEventListener('click', (e) => {
+            e.preventDefault();
+            const desktopOpenSidebarBtn = document.getElementById('openSidebarBtn');
+            if (desktopOpenSidebarBtn) desktopOpenSidebarBtn.click();
+        });
+    }
+
+    // Bottom Nav Item Active State Toggling
+    const navItems = document.querySelectorAll('.mob-nav-item');
+    navItems.forEach(item => {
+        item.addEventListener('click', () => {
+            navItems.forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+        });
+    });
+
+    // Categories click behavior (scrolls to catalog)
+    const categoriesNavBtn = document.querySelector('.mob-nav-item[href="#catalog"]');
+    if (categoriesNavBtn) {
+        categoriesNavBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const catalogSec = document.getElementById('catalog');
+            if (catalogSec) catalogSec.scrollIntoView({ behavior: 'smooth' });
+        });
+    }
+
+    // Wishlist click
+    const mobWishlistBtn = document.querySelector('.mob-wishlist-btn');
+    if (mobWishlistBtn) {
+        mobWishlistBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            // Find desktop wishlist button
+            const desktopWishlist = Array.from(document.querySelectorAll('.ts-action-item')).find(el => el.innerText.toLowerCase().includes('wishlist'));
+            if (desktopWishlist) {
+                desktopWishlist.click();
+            } else {
+                // fallback if text match fails
+                const wishlistModal = document.getElementById('wishlist-modal');
+                if (wishlistModal) {
+                    wishlistModal.classList.add('active');
+                    if (typeof renderWishlist === 'function') renderWishlist();
+                }
+            }
+        });
+    }
+
+    // Cart click
+    const mobCartBtn = document.querySelector('.mob-cart-btn');
+    if (mobCartBtn) {
+        mobCartBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const desktopCart = document.querySelector('.ts-action-item.cart-btn');
+            if (desktopCart) {
+                desktopCart.click();
+            } else {
+                // fallback
+                const cartModal = document.getElementById('cart-modal');
+                if (cartModal) {
+                    cartModal.classList.add('active');
+                    if (typeof renderCart === 'function') renderCart();
+                }
+            }
+        });
+    }
+
+    // Track order click
+    const mobTrackBtn = document.querySelector('.mob-track-btn');
+    if (mobTrackBtn) {
+        mobTrackBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const desktopTrack = Array.from(document.querySelectorAll('.ts-action-item')).find(el => el.innerText.toLowerCase().includes('track order'));
+            if (desktopTrack) {
+                desktopTrack.click();
+            } else {
+                // fallback
+                const trackModal = document.getElementById('track-order-modal');
+                if (trackModal) trackModal.classList.add('active');
+            }
+        });
+    }
+});
+</script>
+<!-- Floating Call Widget -->
+<style>
+/* Floating Call Widget Styles */
+.floating-call-widget {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 9999;
+    font-family: 'Outfit', sans-serif;
+}
+
+/* Call FAB Button */
+.call-fab-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ad1f35, #e11d48);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(173, 31, 53, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.call-fab-btn:hover {
+    transform: scale(1.1) rotate(15deg);
+    box-shadow: 0 6px 24px rgba(173, 31, 53, 0.6);
+}
+
+.call-fab-btn i {
+    transition: transform 0.3s ease;
+}
+
+.call-fab-btn.active {
+    transform: scale(0.9);
+    background: #1e293b;
+    box-shadow: 0 4px 15px rgba(30, 41, 59, 0.3);
+}
+
+/* Pulse Animation for FAB */
+.pulse-ring {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: rgba(173, 31, 53, 0.4);
+    animation: callPulse 2s infinite;
+    z-index: -1;
+    pointer-events: none;
+}
+
+.pulse-ring.ring-2 {
+    animation-delay: 0.5s;
+}
+
+@keyframes callPulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1.6);
+        opacity: 0;
+    }
+}
+
+/* Call Pop-up Card */
+.call-popup-card {
+    position: absolute;
+    bottom: 80px;
+    right: 0;
+    width: 320px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px) scale(0.9);
+    transform-origin: bottom right;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    padding: 20px;
+}
+
+.call-popup-card.open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+
+/* Close Button */
+.call-popup-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: color 0.2s ease;
+}
+
+.call-popup-close:hover {
+    color: #64748b;
+}
+
+/* Card Header */
+.call-popup-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.call-popup-icon-wrap {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(173, 31, 53, 0.1);
+    color: #ad1f35;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.call-popup-title-wrap h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.call-popup-title-wrap p {
+    margin: 2px 0 0 0;
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+/* Card Body & Buttons */
+.call-popup-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.call-number-btn {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    border-radius: 10px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.call-number-btn:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    transform: translateY(-2px);
+}
+
+.call-number-btn .num-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: #fff;
+    color: #10b981;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.call-number-btn:nth-child(2) .num-icon {
+    color: #3b82f6;
+}
+
+.call-number-btn .num-details {
+    flex: 1;
+    margin-left: 12px;
+    display: flex;
+    flex-direction: column;
+}
+
+.call-number-btn .num-label {
+    font-size: 0.72rem;
+    color: #64748b;
+    font-weight: 600;
+}
+
+.call-number-btn .num-val {
+    font-size: 0.95rem;
+    color: #1e293b;
+    font-weight: 700;
+    margin-top: 1px;
+}
+
+.call-number-btn .num-arrow {
+    color: #cbd5e1;
+    font-size: 0.8rem;
+    transition: transform 0.2s ease;
+}
+
+.call-number-btn:hover .num-arrow {
+    transform: translateX(3px);
+    color: #94a3b8;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+    .floating-call-widget {
+        bottom: 80px;
+        right: 16px;
+    }
+    
+    .call-popup-card {
+        width: 280px;
+        bottom: 70px;
+    }
+}
+</style>
+
+<div class="floating-call-widget" id="floatingCallWidget">
+    <!-- Call Pop-up Card -->
+    <div class="call-popup-card" id="callPopupCard">
+        <button class="call-popup-close" onclick="toggleCallPopup(event)" aria-label="Close">
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="call-popup-header">
+            <div class="call-popup-icon-wrap">
+                <i class="fas fa-headset"></i>
+            </div>
+            <div class="call-popup-title-wrap">
+                <h3>Contact Peekey</h3>
+                <p>Call our support lines directly</p>
+            </div>
+        </div>
+        <div class="call-popup-body">
+            <a href="tel:+919495988211" class="call-number-btn">
+                <div class="num-icon"><i class="fas fa-phone-alt"></i></div>
+                <div class="num-details">
+                    <span class="num-label">Primary Support</span>
+                    <span class="num-val">+91 94959 88211</span>
+                </div>
+                <div class="num-arrow"><i class="fas fa-chevron-right"></i></div>
+            </a>
+            <a href="tel:+917012767443" class="call-number-btn">
+                <div class="num-icon"><i class="fas fa-phone-alt"></i></div>
+                <div class="num-details">
+                    <span class="num-label">General Enquiries</span>
+                    <span class="num-val">+91 70127 67443</span>
+                </div>
+                <div class="num-arrow"><i class="fas fa-chevron-right"></i></div>
+            </a>
+        </div>
+    </div>
+    
+    <!-- Floating FAB Button -->
+    <button class="call-fab-btn" id="callFabBtn" onclick="toggleCallPopup(event)" aria-label="Call Support">
+        <i class="fas fa-phone-alt" id="callFabIcon"></i>
+        <span class="pulse-ring"></span>
+        <span class="pulse-ring ring-2"></span>
+    </button>
+</div>
+
+<script>
+function toggleCallPopup(event) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  const popup = document.getElementById('callPopupCard');
+  const btn = document.getElementById('callFabBtn');
+  const icon = document.getElementById('callFabIcon');
+  if (!popup || !btn) return;
+  
+  const isOpen = popup.classList.contains('open');
+  if (isOpen) {
+    popup.classList.remove('open');
+    btn.classList.remove('active');
+    if (icon) icon.className = 'fas fa-phone-alt';
+  } else {
+    popup.classList.add('open');
+    btn.classList.add('active');
+    if (icon) icon.className = 'fas fa-times';
+  }
+}
+
+// Close popup when clicking outside
+document.addEventListener('click', function(event) {
+  const widget = document.getElementById('floatingCallWidget');
+  const popup = document.getElementById('callPopupCard');
+  const btn = document.getElementById('callFabBtn');
+  const icon = document.getElementById('callFabIcon');
+  if (!widget || !popup || !btn) return;
+  
+  if (!widget.contains(event.target) && popup.classList.contains('open')) {
+    popup.classList.remove('open');
+    btn.classList.remove('active');
+    if (icon) icon.className = 'fas fa-phone-alt';
+  }
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get('q');
+    if (q) {
+        const searchInput = document.querySelector('.ts-search input[type="text"]');
+        const searchBtn   = document.querySelector('.ts-search button[type="submit"]');
+        if (searchInput && searchBtn) {
+            searchInput.value = q;
+            searchBtn.click();
+        }
+    }
+});
+</script>
+</body>
+</html>
+
+
+
+

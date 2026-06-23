@@ -505,23 +505,7 @@
             </div>
             
             <div class="category-grid-exact">
-                <a href="inventory.html" class="cat-card-exact">
-                    <div class="cat-card-content">
-                        <h3>Mixer<br>Grinders</h3>
-                        <span class="shop-now-text">SHOP NOW &rarr;</span>
-                    </div>
-                    <img src="mixer grinder.png" alt="Mixer Grinder" class="cat-card-img">
-                    <div class="cat-card-btn"><i class="fas fa-arrow-right"></i></div>
-                </a>
-                <a href="inventory.html" class="cat-card-exact">
-                    <div class="cat-card-content">
-                        <h3>Pressure<br>Cookers</h3>
-                        <span class="shop-now-text">SHOP NOW &rarr;</span>
-                    </div>
-                    <img src="Pressure Cooker.png" alt="Pressure Cookers" class="cat-card-img">
-                    <div class="cat-card-btn"><i class="fas fa-arrow-right"></i></div>
-                </a>
-                <a href="inventory.html" class="cat-card-exact">
+                <a href="inventory.html?q=Cookware" class="cat-card-exact">
                     <div class="cat-card-content">
                         <h3>Cookware</h3>
                         <span class="shop-now-text">SHOP NOW &rarr;</span>
@@ -529,7 +513,31 @@
                     <img src="Non-Stick Cookware.png" alt="Cookware" class="cat-card-img">
                     <div class="cat-card-btn"><i class="fas fa-arrow-right"></i></div>
                 </a>
-                <a href="inventory.html" class="cat-card-exact">
+                <a href="inventory.html?q=Home Essentials" class="cat-card-exact">
+                    <div class="cat-card-content">
+                        <h3>Home<br>Essentials</h3>
+                        <span class="shop-now-text">SHOP NOW &rarr;</span>
+                    </div>
+                    <img src="lunch box.png" alt="Home Essentials" class="cat-card-img">
+                    <div class="cat-card-btn"><i class="fas fa-arrow-right"></i></div>
+                </a>
+                <a href="inventory.html?q=Mixer Grinder" class="cat-card-exact">
+                    <div class="cat-card-content">
+                        <h3>Mixer<br>Grinders</h3>
+                        <span class="shop-now-text">SHOP NOW &rarr;</span>
+                    </div>
+                    <img src="mixer grinder.png" alt="Mixer Grinder" class="cat-card-img">
+                    <div class="cat-card-btn"><i class="fas fa-arrow-right"></i></div>
+                </a>
+                <a href="inventory.html?q=Cooker" class="cat-card-exact">
+                    <div class="cat-card-content">
+                        <h3>Pressure<br>Cookers</h3>
+                        <span class="shop-now-text">SHOP NOW &rarr;</span>
+                    </div>
+                    <img src="Pressure Cooker.png" alt="Pressure Cookers" class="cat-card-img">
+                    <div class="cat-card-btn"><i class="fas fa-arrow-right"></i></div>
+                </a>
+                <a href="inventory.html?q=Small Appliances" class="cat-card-exact">
                     <div class="cat-card-content">
                         <h3>Small<br>Appliances</h3>
                         <span class="shop-now-text">SHOP NOW &rarr;</span>
@@ -537,20 +545,12 @@
                     <img src="Air Fryer.png" alt="Small Appliances" class="cat-card-img">
                     <div class="cat-card-btn"><i class="fas fa-arrow-right"></i></div>
                 </a>
-                <a href="inventory.html" class="cat-card-exact">
+                <a href="inventory.html?q=Storage" class="cat-card-exact">
                     <div class="cat-card-content">
                         <h3>Storage<br>Solutions</h3>
                         <span class="shop-now-text">SHOP NOW &rarr;</span>
                     </div>
                     <img src="Storage Containers.png" alt="Storage Solutions" class="cat-card-img">
-                    <div class="cat-card-btn"><i class="fas fa-arrow-right"></i></div>
-                </a>
-                <a href="inventory.html" class="cat-card-exact">
-                    <div class="cat-card-content">
-                        <h3>Home<br>Essentials</h3>
-                        <span class="shop-now-text">SHOP NOW &rarr;</span>
-                    </div>
-                    <img src="lunch box.png" alt="Home Essentials" class="cat-card-img">
                     <div class="cat-card-btn"><i class="fas fa-arrow-right"></i></div>
                 </a>
             </div>
@@ -760,6 +760,68 @@
         <p>Explore our premium collection of appliances and home essentials.</p>
     </div>
 
+    <!-- Style for Cooker Group Slot stack effect -->
+    <style>
+        .cooker-group-slot .item-image-placeholder {
+            position: relative;
+            overflow: visible !important;
+            z-index: 1;
+        }
+        .cooker-group-slot .item-image-placeholder::after {
+            content: '';
+            position: absolute;
+            inset: 4px;
+            border-radius: 8px;
+            border: 1px solid rgba(0,0,0,0.06);
+            background: #fff;
+            z-index: -1;
+            transform: rotate(3deg) translate(2px, 2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+            transition: 0.3s ease;
+        }
+        .cooker-group-slot .item-image-placeholder::before {
+            content: '';
+            position: absolute;
+            inset: 4px;
+            border-radius: 8px;
+            border: 1px solid rgba(0,0,0,0.06);
+            background: #fff;
+            z-index: -2;
+            transform: rotate(-3deg) translate(-2px, -2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+            transition: 0.3s ease;
+        }
+        .cooker-group-slot:hover .item-image-placeholder::after {
+            transform: rotate(7deg) translate(5px, 5px);
+        }
+        .cooker-group-slot:hover .item-image-placeholder::before {
+            transform: rotate(-7deg) translate(-5px, -5px);
+        }
+        .cooker-group-slot .shelf-actions {
+            display: none !important;
+        }
+        .cooker-item-hidden {
+            display: none;
+        }
+    </style>
+
+    <!-- Cookers Collection Sub-Section -->
+    <section class="inventory-section section-padding" id="cookers-collection-section" style="display: none; background: #fffdfd; border-top: 1.5px dashed rgba(173, 31, 53, 0.2); border-bottom: 1.5px dashed rgba(173, 31, 53, 0.2); padding: 40px 0; margin-bottom: 25px; box-shadow: inset 0 0 15px rgba(173, 31, 53, 0.02);">
+        <div class="container" style="position: relative;">
+            <button id="close-cookers-btn" style="position: absolute; top: -10px; right: 15px; background: #fff; border: 1.5px solid #ddd; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #666; font-size: 1.1rem; transition: 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.08); z-index: 10;" onmouseover="this.style.background='#ad1f35';this.style.color='#fff';this.style.borderColor='#ad1f35';" onmouseout="this.style.background='#fff';this.style.color='#666';this.style.borderColor='#ddd';">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="section-title-new" style="margin-bottom: 30px;">
+                <div class="line"></div>
+                <h2 style="color: var(--red); display: flex; align-items: center; gap: 8px;"><i class="fas fa-utensils"></i> Cookers Collection</h2>
+                <div class="line"></div>
+            </div>
+            <div class="shelf-container" id="shelf-cookers">
+                <!-- Cooker items will be loaded here dynamically -->
+            </div>
+        </div>
+    </section>
+
     <section class="inventory-section section-padding">
         <div class="container">
             <div class="section-title-new"><div class="line"></div><h2>🍳 KITCHEN &amp; DINING</h2><div class="line"></div></div>
@@ -882,12 +944,61 @@
                     <h4>CONTACT US</h4>
                     <ul>
                         <li><a href="tel:+919495988211" style="color: inherit; text-decoration: none;"><i class="fas fa-phone-alt"></i> +91 94959 88211</a></li>
-                        <li><a href="mailto:info@peekey.com" style="color: inherit; text-decoration: none;"><i class="fas fa-envelope"></i> info@peekey.com</a></li>
-                        <li><a href="https://maps.google.com/?q=ULIKKAL+PO,+670705,+ULIKKAL+CENTER+MAIN+ROAD" target="_blank" style="color: inherit; text-decoration: none;"><i class="fas fa-map-marker-alt"></i> ULIKKAL PO, 670705,<br>ULIKKAL CENTER MAIN ROAD</a></li>
+                        <li><a href="tel:+917012767443" style="color: inherit; text-decoration: none;"><i class="fas fa-phone-alt"></i> +91 70127 67443</a></li>
+                        <li><a href="mailto:anvarsadikh786@gmail.com" style="color: inherit; text-decoration: none;"><i class="fas fa-envelope"></i> anvarsadikh786@gmail.com</a></li>
+                        <li><a href="https://maps.app.goo.gl/anzAXeuXoRe4LNdaA" target="_blank" style="color: inherit; text-decoration: none;"><i class="fas fa-map-marker-alt"></i> ULIKKAL PO, 670705,<br>ULIKKAL CENTER MAIN ROAD</a></li>
                     </ul>
                 </div>
             </div>
-            
+
+            <!-- Embedded Google Map + Location Details -->
+            <div style="margin: 36px 0 24px; border-radius: 14px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 8px 30px rgba(0,0,0,0.4); display: flex; flex-wrap: wrap; min-height: 280px;">
+                <!-- Map Embed -->
+                <div style="flex: 2; min-width: 280px; min-height: 280px;">
+                    <iframe
+                        src="https://maps.google.com/maps?q=Peekey+metals+ulikkal&output=embed&z=16"
+                        width="100%"
+                        height="280"
+                        style="border:0; display:block;"
+                        allowfullscreen=""
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade"
+                        title="Peekey Store Location">
+                    </iframe>
+                </div>
+                <!-- Location Info Panel -->
+                <div style="flex: 1; min-width: 240px; background: linear-gradient(135deg, #1a2e20, #0f1a14); padding: 30px 26px; display: flex; flex-direction: column; justify-content: center; gap: 16px; border-left: 1px solid rgba(255,255,255,0.06);">
+                    <h4 style="color: var(--red); font-size: 0.78rem; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; margin: 0;">📍 Find Us Here</h4>
+                    <div style="display: flex; gap: 12px; align-items: flex-start;">
+                        <i class="fas fa-map-marker-alt" style="color: var(--red); margin-top: 4px; flex-shrink: 0; font-size: 1rem;"></i>
+                        <div>
+                            <p style="color: #fff; font-weight: 700; font-size: 0.92rem; margin: 0 0 4px; font-family: 'Outfit', sans-serif;">Peekey Metals &amp; Appliances</p>
+                            <p style="color: rgba(255,255,255,0.58); font-size: 0.82rem; margin: 0; line-height: 1.6; font-family: 'Outfit', sans-serif;">Ulikkal Center Main Road,<br>Ulikkal PO – 670705,<br>Kannur District, Kerala</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 12px; align-items: flex-start;">
+                        <i class="fas fa-phone-alt" style="color: var(--red); flex-shrink: 0; font-size: 0.9rem; margin-top: 3px;"></i>
+                        <div style="display: flex; flex-direction: column; gap: 6px;">
+                            <a href="tel:+919495988211" style="color: rgba(255,255,255,0.72); font-size: 0.85rem; text-decoration: none; font-family: 'Outfit', sans-serif;">+91 94959 88211</a>
+                            <a href="tel:+917012767443" style="color: rgba(255,255,255,0.72); font-size: 0.85rem; text-decoration: none; font-family: 'Outfit', sans-serif;">+91 70127 67443</a>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 12px; align-items: center;">
+                        <i class="fas fa-envelope" style="color: var(--red); flex-shrink: 0; font-size: 0.9rem;"></i>
+                        <a href="mailto:anvarsadikh786@gmail.com" style="color: rgba(255,255,255,0.72); font-size: 0.8rem; text-decoration: none; font-family: 'Outfit', sans-serif;">anvarsadikh786@gmail.com</a>
+                    </div>
+                    <div style="display: flex; gap: 12px; align-items: center;">
+                        <i class="fas fa-clock" style="color: var(--red); flex-shrink: 0; font-size: 0.9rem;"></i>
+                        <span style="color: rgba(255,255,255,0.58); font-size: 0.82rem; font-family: 'Outfit', sans-serif;">Mon – Sat &nbsp;|&nbsp; 9:00 AM – 7:00 PM</span>
+                    </div>
+                    <a href="https://maps.app.goo.gl/anzAXeuXoRe4LNdaA" target="_blank"
+                       style="display: inline-flex; align-items: center; gap: 8px; background: var(--red); color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; text-decoration: none; transition: 0.2s; width: fit-content; font-family: 'Outfit', sans-serif; margin-top: 4px;"
+                       onmouseover="this.style.background='#a00d24'" onmouseout="this.style.background='var(--red)'">
+                        <i class="fas fa-directions"></i> Get Directions
+                    </a>
+                </div>
+            </div>
+
             <div class="footer-bottom-exact">
                 <p>&copy; 2026 Peekey. All Rights Reserved.</p>
                 <div class="footer-links">
@@ -906,7 +1017,7 @@
     <script src="main.js?v=1003"></script>
     <script src="ecommerce.js?v=1004"></script>
     <script src="cloud-images.js?v=1003"></script>
-    <script src="desc-popup.js?v=1003"></script>
+    <script src="desc-popup.js?v=1004"></script>
     <script>CloudImages.applyToPage();</script>
     <script>
     // Load admin-uploaded cloud products into the correct shelf sections
@@ -1229,14 +1340,44 @@
               syncStaticSections();
             }
           };
-
-          card.appendChild(btn);
         });
+      }
+
+      function openCookersSection() {
+        const sec = document.getElementById('cookers-collection-section');
+        if (sec) {
+          sec.style.display = 'block';
+          sec.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+      window.openCookersSection = openCookersSection;
+
+      function closeCookersSection() {
+        const sec = document.getElementById('cookers-collection-section');
+        if (sec) {
+          sec.style.display = 'none';
+        }
+      }
+      window.closeCookersSection = closeCookersSection;
+
+      function initCloseCookersBtn() {
+        const btn = document.getElementById('close-cookers-btn');
+        if (btn) {
+          btn.addEventListener('click', closeCookersSection);
+        }
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initCloseCookersBtn);
+      } else {
+        initCloseCookersBtn();
       }
 
       function load(){
         // Remove old dynamic elements
         document.querySelectorAll('.shelf-item.pk-cloud-item').forEach(el => el.remove());
+
+        const shelfCookers = document.getElementById('shelf-cookers');
+        if (shelfCookers) shelfCookers.innerHTML = '';
 
         let products;
         try{ products = JSON.parse(localStorage.getItem(SK)||'[]'); }catch{ return; }
@@ -1250,7 +1391,35 @@
           document.body.classList.remove('admin-mode-active');
         }
 
-        products.forEach((p, idx) => {
+        // Group cooker products
+        const cookerProducts = products.filter(p => (p.name || '').toLowerCase().includes('cooker')).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+        const otherProducts = products.filter(p => !(p.name || '').toLowerCase().includes('cooker')).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+
+        // Helper to render a shelf item
+        function renderItem(p, isHiddenCooker = false) {
+          const el = document.createElement('div');
+          el.className = 'shelf-item pk-cloud-item' + (isHiddenCooker ? ' cooker-item-hidden' : '');
+          el.dataset.pkid = p.id;
+          el.setAttribute('data-category', p.category);
+          el.setAttribute('data-name', p.name);
+
+          el.innerHTML = `
+            <div class="item-image-placeholder">
+              <img src="${p.url}" alt="${p.name}" loading="lazy"
+                onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'80\' height=\'80\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%23cbd5e1\' stroke-width=\'1.5\'><rect x=\'3\' y=\'3\' width=\'18\' height=\'18\' rx=\'2\'/><circle cx=\'8.5\' cy=\'8.5\' r=\'1.5\'/><polyline points=\'21 15 16 10 5 21\'/></svg>';this.style.padding='20px';this.style.background='#f1f5f9';">
+            </div>
+            <div class="item-name">${p.name}</div>
+            ${p.price ? `<div class="item-price" style="color:#ad1f35;font-weight:700;font-size:0.85rem;margin-top:4px;text-align:center;">₹${p.price}</div>` : '<div class="item-price" style="color:#666;font-size:0.75rem;margin-top:4px;text-align:center;">Ask Price</div>'}
+            <div class="shelf-actions">
+              <button class="shelf-wishlist-btn" title="Add to Wishlist"><i class="far fa-heart"></i></button>
+              <button class="shelf-cart-btn" title="Add to Cart"><i class="fas fa-shopping-cart"></i></button>
+            </div>
+          `;
+          return el;
+        }
+
+        // Render other products on normal shelves
+        otherProducts.forEach((p) => {
           let shelfId = 'shelf-home';
           const cat = p.category;
           const name = (p.name || '').toLowerCase();
@@ -1271,35 +1440,53 @@
           
           const shelf = document.getElementById(shelfId);
           if(!shelf) return;
-          const el = document.createElement('div');
-          el.className = 'shelf-item pk-cloud-item';
-          el.dataset.pkid = p.id;
-          el.setAttribute('data-category', p.category);
-          el.setAttribute('data-name', p.name);
-          
-          // Card clicks are handled by desc-popup.js Detail Modal.
-
-          el.innerHTML = `
-            <div class="item-image-placeholder">
-              <img src="${p.url}" alt="${p.name}" loading="lazy"
-                onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'80\' height=\'80\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%23cbd5e1\' stroke-width=\'1.5\'><rect x=\'3\' y=\'3\' width=\'18\' height=\'18\' rx=\'2\'/><circle cx=\'8.5\' cy=\'8.5\' r=\'1.5\'/><polyline points=\'21 15 16 10 5 21\'/></svg>';this.style.padding='20px';this.style.background='#f1f5f9';">
-            </div>
-            <div class="item-name">${p.name}</div>
-            ${p.price ? `<div class="item-price" style="color:#ad1f35;font-weight:700;font-size:0.85rem;margin-top:4px;text-align:center;">₹${p.price}</div>` : '<div class="item-price" style="color:#666;font-size:0.75rem;margin-top:4px;text-align:center;">Ask Price</div>'}
-            <div class="shelf-actions">
-              <button class="shelf-wishlist-btn" title="Add to Wishlist"><i class="far fa-heart"></i></button>
-              <button class="shelf-cart-btn" title="Add to Cart"><i class="fas fa-shopping-cart"></i></button>
-            </div>
-          `;
+          const el = renderItem(p, false);
           shelf.appendChild(el);
         });
-        
+
+        // If we have cooker products, render them:
+        if (cookerProducts.length > 0) {
+          // 1. Render Cooker Group Slot on Kitchen Shelf
+          const kitchenShelf = document.getElementById('shelf-kitchen');
+          if (kitchenShelf) {
+            const groupEl = document.createElement('div');
+            groupEl.className = 'shelf-item pk-cloud-item cooker-group-slot';
+            groupEl.setAttribute('data-category', 'Kitchenware');
+            groupEl.setAttribute('data-name', 'Cookers Collection');
+            groupEl.innerHTML = `
+              <div class="item-image-placeholder">
+                <img src="${cookerProducts[0].url}" alt="Cookers Collection" loading="lazy"
+                  onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'80\' height=\'80\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%23cbd5e1\' stroke-width=\'1.5\\'><rect x=\\'3\\' y=\\'3\\' width=\\'18\\' height=\\'18\\' rx=\\'2\\'/><circle cx=\\'8.5\\' cy=\\'8.5\\' r=\\'1.5\\'/><polyline points=\\'21 15 16 10 5 21\\'/></svg>';this.style.padding='20px';this.style.background='#f1f5f9';">
+                <span style="position: absolute; bottom: 8px; right: 8px; background: rgba(173,31,53,0.9); color: #fff; padding: 3px 8px; font-size: 0.65rem; border-radius: 20px; font-weight: 700; border: 1px solid rgba(255,255,255,0.2); letter-spacing: 0.5px; box-shadow: 0 2px 6px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 4px;">
+                  <i class="fas fa-layer-group"></i> ${cookerProducts.length} Items
+                </span>
+              </div>
+              <div class="item-name" style="font-weight: 800; color: #111;">Cookers Collection</div>
+              <div class="item-price" style="color: #666; font-size: 0.72rem; margin-top: 4px; text-align: center; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px;">Multiple Options</div>
+            `;
+            kitchenShelf.appendChild(groupEl);
+          }
+
+          // 2. Render individual cookers on Kitchen Shelf but HIDDEN (for search mapping)
+          if (kitchenShelf) {
+            cookerProducts.forEach(p => {
+              const el = renderItem(p, true);
+              kitchenShelf.appendChild(el);
+            });
+          }
+
+          // 3. Render individual cookers inside the Cooker Collection shelf
+          if (shelfCookers) {
+            cookerProducts.forEach(p => {
+              const el = renderItem(p, false);
+              shelfCookers.appendChild(el);
+            });
+          }
+        }
+
         attachInlineDescUploadButtons();
         syncStaticSections();
-        if (!searchInitialized) {
-          initializeSearchFilter();
-          searchInitialized = true;
-        }
+        // Search filter initialization is now handled entirely by ecommerce.js
         if (window.updateProductCardStatus) {
           window.updateProductCardStatus();
         }
@@ -1357,160 +1544,6 @@
           }
         });
       }
-
-      function initializeSearchFilter() {
-        const searchInput = document.querySelector('.ts-search input[type="text"]');
-        const searchBtn   = document.querySelector('.ts-search button[type="submit"]');
-        const categoryItems   = document.querySelectorAll('.search-dropdown-menu li');
-        const selectedCatText = document.getElementById('selected-category-text');
-
-        if (!searchInput) return;
-
-        // Inject no-results banner once
-        if (!document.getElementById('pk-no-results')) {
-          const banner = document.createElement('div');
-          banner.id = 'pk-no-results';
-          banner.style.cssText = [
-            'display:none',
-            'text-align:center',
-            'padding:60px 20px',
-            'font-family:"Outfit",sans-serif',
-            'color:#7a8099',
-            'font-size:1.05rem',
-          ].join(';');
-          banner.innerHTML = '<i class="fas fa-search" style="font-size:2.5rem;color:#cbd5e1;display:block;margin-bottom:14px;"></i>'
-            + '<strong style="color:#1a2035;font-size:1.2rem;">No products found</strong>'
-            + '<p style="margin-top:8px;">Try a different keyword or category.</p>';
-          const catalogAnchor = document.getElementById('catalog');
-          if (catalogAnchor) catalogAnchor.after(banner);
-        }
-
-        let activeCategory = 'All Categories';
-
-        categoryItems.forEach(item => {
-          item.addEventListener('click', () => {
-            activeCategory = item.getAttribute('data-value') || 'All Categories';
-            if (selectedCatText) {
-              selectedCatText.innerHTML = activeCategory + ' <i class="fas fa-chevron-down"></i>';
-            }
-            performSearch();
-          });
-        });
-
-        // Only search on button click or Enter — NOT on every keystroke
-        if (searchBtn) {
-          searchBtn.addEventListener('click', e => {
-            e.preventDefault();
-            performSearch();
-          });
-        }
-        searchInput.addEventListener('keydown', e => {
-          if (e.key === 'Enter') { e.preventDefault(); performSearch(); }
-        });
-        // Clear button: pressing Escape or emptying the box restores everything
-        searchInput.addEventListener('keyup', e => {
-          if (e.key === 'Escape' || searchInput.value.trim() === '') {
-            searchInput.value = '';
-            resetSearch();
-          }
-        });
-
-        function resetSearch() {
-          // Show all inventory sections and their items
-          document.querySelectorAll('.inventory-section').forEach(s => {
-            s.style.display = '';
-            s.querySelectorAll('.shelf-item').forEach(i => i.style.display = '');
-          });
-          document.querySelectorAll('.section-divider').forEach(d => d.style.display = '');
-          const bs = document.getElementById('best-sellers');
-          if (bs) {
-            bs.style.display = '';
-            bs.querySelectorAll('.product-card-exact').forEach(c => c.style.display = '');
-          }
-          const banner = document.getElementById('pk-no-results');
-          if (banner) banner.style.display = 'none';
-        }
-
-        function performSearch() {
-          const query = searchInput.value.toLowerCase().trim();
-
-          // Scroll to catalog so user sees results
-          if (query !== '') {
-            const catalogEl = document.getElementById('catalog');
-            if (catalogEl) catalogEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }
-
-          // ── Filter dynamic shelf items inside inventory sections ──
-          let totalVisible = 0;
-
-          const inventorySections = document.querySelectorAll('.inventory-section');
-          inventorySections.forEach(section => {
-            const shelfItems = section.querySelectorAll('.shelf-item');
-            if (shelfItems.length === 0) {
-              // Hide sections that have no items at all when searching
-              section.style.display = (query === '') ? '' : 'none';
-              return;
-            }
-
-            let sectionVisible = 0;
-            shelfItems.forEach(item => {
-              const name     = (item.getAttribute('data-name') || item.querySelector('.item-name')?.textContent || '').toLowerCase();
-              const category = (item.getAttribute('data-category') || '').toLowerCase().trim();
-
-              const matchesQuery    = (query === '') || name.includes(query);
-              const matchesCategory = (activeCategory === 'All Categories')
-                || category === activeCategory.toLowerCase().trim();
-
-              if (matchesQuery && matchesCategory) {
-                item.style.display = '';
-                sectionVisible++;
-                totalVisible++;
-              } else {
-                item.style.display = 'none';
-              }
-            });
-
-            // Hide/show the whole section + its dividers
-            const hide = (sectionVisible === 0 && query !== '');
-            section.style.display = hide ? 'none' : '';
-
-            // Hide adjacent .section-divider too
-            const next = section.nextElementSibling;
-            if (next && next.classList.contains('section-divider')) {
-              next.style.display = hide ? 'none' : '';
-            }
-          });
-
-          // ── Filter Best-Sellers static cards ──
-          const bestSellersSection = document.getElementById('best-sellers');
-          if (bestSellersSection) {
-            const staticCards = bestSellersSection.querySelectorAll('.product-card-exact');
-            let bsVisible = 0;
-            staticCards.forEach(card => {
-              const name     = (card.querySelector('.product-title-exact')?.textContent || '').toLowerCase();
-              const category = (card.getAttribute('data-category') || '').toLowerCase().trim();
-
-              const matchesQuery    = (query === '') || name.includes(query);
-              const matchesCategory = (activeCategory === 'All Categories')
-                || category === activeCategory.toLowerCase().trim();
-
-              if (matchesQuery && matchesCategory) {
-                card.style.display = '';
-                bsVisible++;
-                totalVisible++;
-              } else {
-                card.style.display = 'none';
-              }
-            });
-            bestSellersSection.style.display = (bsVisible === 0 && query !== '') ? 'none' : '';
-          }
-
-          // ── Show / hide no-results banner ──
-          const banner = document.getElementById('pk-no-results');
-          if (banner) banner.style.display = (totalVisible === 0 && query !== '') ? 'block' : 'none';
-        }
-      }
-
       if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',load);
       else load();
       window.addEventListener('storage', e => { if(e.key===SK) load(); });

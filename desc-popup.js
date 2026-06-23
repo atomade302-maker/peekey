@@ -104,20 +104,27 @@
     }
     .pk-detail-main-display {
       width: 100%;
-      aspect-ratio: 1.1;
+      aspect-ratio: 1.15;
       border-radius: 16px;
-      background: #f8fafc;
+      background: #ffffff;
       border: 1px solid #e2e8f0;
       overflow: hidden;
       position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.02);
     }
-    .pk-detail-main-display img, .pk-detail-main-display video {
-      max-width: 92%;
-      max-height: 92%;
+    .pk-detail-main-display img {
+      max-width: 95%;
+      max-height: 95%;
+      object-fit: contain;
+      border-radius: 8px;
+      mix-blend-mode: multiply;
+    }
+    .pk-detail-main-display video {
+      max-width: 100%;
+      max-height: 100%;
       object-fit: contain;
       border-radius: 8px;
     }
@@ -130,7 +137,7 @@
       aspect-ratio: 1;
       border-radius: 12px;
       border: 2px solid #e2e8f0;
-      background: #f8fafc;
+      background: #ffffff;
       cursor: pointer;
       overflow: hidden;
       position: relative;
@@ -152,6 +159,7 @@
       max-width: 85%;
       max-height: 85%;
       object-fit: contain;
+      mix-blend-mode: multiply;
     }
     .pk-thumb-slot.placeholder-icon::before {
       content: "\\f03e";
@@ -1072,6 +1080,24 @@
       const isPlaceholder = btn.parentElement.classList.contains('placeholder-icon');
       btn.style.display = (isAdmin && !isPlaceholder) ? 'flex' : 'none';
     });
+
+    // Hide empty thumbnail slots for customers
+    thumbUrl.style.display = 'flex';
+    thumbImg1.style.display = (p.img1 || isAdmin) ? 'flex' : 'none';
+    thumbImg2.style.display = (p.img2 || isAdmin) ? 'flex' : 'none';
+    thumbVideo.style.display = (p.video || isAdmin) ? 'flex' : 'none';
+
+    // If only one thumbnail is visible, hide the thumbnails row entirely for customers
+    const thumbnailsContainer = document.querySelector('.pk-detail-thumbnails');
+    if (thumbnailsContainer) {
+      const visibleThumbs = [thumbUrl, thumbImg1, thumbImg2, thumbVideo].filter(t => t.style.display !== 'none');
+      if (visibleThumbs.length <= 1 && !isAdmin) {
+        thumbnailsContainer.style.display = 'none';
+      } else {
+        thumbnailsContainer.style.display = 'grid';
+      }
+    }
+
     if (adminEditTitleBtn) adminEditTitleBtn.style.display = isAdmin ? 'inline-flex' : 'none';
     if (adminEditPriceBtn) adminEditPriceBtn.style.display = isAdmin ? 'inline-flex' : 'none';
     if (adminEditSpecs) adminEditSpecs.style.display = isAdmin ? 'inline-flex' : 'none';
@@ -1610,6 +1636,13 @@
     if (card) {
       e.stopPropagation();
       e.preventDefault();
+
+      if (card.classList.contains('cooker-group-slot')) {
+        if (window.openCookersSection) {
+          window.openCookersSection();
+        }
+        return;
+      }
 
       const name = card.querySelector('.item-name, .product-title-exact')?.textContent?.trim() || '';
       const img = card.querySelector('img')?.src || '';
